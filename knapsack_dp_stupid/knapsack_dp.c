@@ -17,13 +17,13 @@ int readInput(FILE* input, Knapsack_item **items_ptr, int *capacity, int *item_n
     if (inputLine != NULL){
         sscanf(inputLine, "%i %i", item_num, capacity);
     } else {
-        cfree(inputLine);
+        free(inputLine);
         fclose(input);
         return 1;
     }
     (*items_ptr) =(Knapsack_item*) calloc(*item_num, sizeof(Knapsack_item));
     if ((*items_ptr) == NULL){
-        cfree(inputLine);
+        free(inputLine);
         fclose(input);
         return 1;
     }
@@ -32,7 +32,7 @@ int readInput(FILE* input, Knapsack_item **items_ptr, int *capacity, int *item_n
         fgets(inputLine, INPUT_BUFF_SIZE, input);
         sscanf(inputLine, "%i %i", &((*items_ptr)[i].value), &((*items_ptr)[i].weight));
     }
-    cfree(inputLine);
+    free(inputLine);
     fclose(input);
     return 0;
 }
@@ -142,13 +142,13 @@ int main(int argc, char** argv) {
         if (!knapsack_table(capacity, items_num, items, &knaptable)){
             if (!findOptimalPack(knaptable, items_num, capacity, &pack_indeces, items)){
                 printOutFile(outputFile, pack_indeces, items_num);
-                cfree(pack_indeces);
+                free(pack_indeces);
             }
             for (i = 0; i < items_num; i++)
-                cfree(knaptable[i]);
-            cfree(knaptable);
+                free(knaptable[i]);
+            free(knaptable);
         }
-        cfree(items);
+        free(items);
     }
     return 0;
 }
