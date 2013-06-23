@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <boost/dynamic_bitset.hpp>
 
 int readInput(FILE* input, Knapsack_item **items_ptr, int *capacity, int *item_num){
     char* inputLine = new char[INPUT_BUFF_SIZE];
@@ -36,40 +37,37 @@ int readInput(FILE* input, Knapsack_item **items_ptr, int *capacity, int *item_n
     return 0;
 }
 
-int knapsack_table(int capacity, int items_num, Knapsack_item* items, int*** knaptable_ptr)
+int knapsack_table(int capacity, int items_num, Knapsack_item* items, boost::dynamic_bitset<>* knaptable_bit)
 {
-    //allocate 2D array
-    (*knaptable_ptr) = new int*[items_num + 1];
-    if ((*knaptable_ptr) == NULL){
-        fprintf(stderr, "Cannot allocate knaptable");
-        return 1;
-    }
-    int i,w;
-    //elemets of first row and col eq zero
-    for (i = 0; i < items_num + 1; i++){
-        (*knaptable_ptr)[i] = new int[capacity + 1];
-        (*knaptable_ptr)[i][0] = 0;
-        (*knaptable_ptr)[0][i] = 0;
-    }
+    int knaptable_ptr[2][capacity + 1];
+    memset(knaptable_ptr[0], 0, capacity + 1);
+    int i, w, j, dj;
+    knaptable_bit[0].resize(capacity + 1, false);
     for (i = 1; i < items_num + 1; i++){
+        knaptable_bit[i].resize(capacity + 1, false);
+        j = i%2;
+        dj = (j ? 1 : -1);
         Knapsack_item tmp_item = items[i-1];
         for (w = 0; w < capacity + 1; w++){
             if (tmp_item.weight <= w){
-                int sum_value = tmp_item.value + (*knaptable_ptr)[i-1][w-tmp_item.weight]; //summary value of itemset
-                if (sum_value > (*knaptable_ptr)[i-1][w]){
-                    (*knaptable_ptr)[i][w] = sum_value;//put it
+                int sum_value = tmp_item.value + knaptable_ptr[j-dj][w-tmp_item.weight]; //summary value of itemset
+                if (sum_value > knaptable_ptr[j-dj][w]){
+                    knaptable_ptr[j][w] = sum_value;//put it
+                    knaptable_bit[i].set(w, true);
                 } else {
-                     (*knaptable_ptr)[i][w] = (*knaptable_ptr)[i-1][w];//don't put
+                     knaptable_ptr[j][w] = knaptable_ptr[j-dj][w];//don't put
+                    knaptable_bit[i].set(w, false);
                 }
             } else { 
-                (*knaptable_ptr)[i][w] = (*knaptable_ptr)[i-1][w];//don't put
+                knaptable_ptr[j][w] = knaptable_ptr[j-dj][w];//don't put
+                knaptable_bit[i].set(w, false);
             }
         }
     }
     return 0;
 }
 
-int findOptimalPack(int** knaptable, int items_num, int capacity, int** pack_indeces_ptr, Knapsack_item *items){
+int findOptimalPack(boost::dynamic_bitset<> *knaptable, int items_num, int capacity, int** pack_indeces_ptr, Knapsack_item *items){
     (*pack_indeces_ptr) = new int[items_num];
     if ((*pack_indeces_ptr) == NULL){
         return 1;
@@ -77,14 +75,12 @@ int findOptimalPack(int** knaptable, int items_num, int capacity, int** pack_ind
     //Traceback
     int w = capacity;
     int i = items_num;
-    while (w && i){
-        if (knaptable[i][w] != knaptable[i-1][w]) {
-            (*pack_indeces_ptr)[i-1] = 1;
+    for (i = items_num; i > 0; i--) {
+        bool is_picked = knaptable[i].test(w);
+        (*pack_indeces_ptr)[i-1] = is_picked;
+        if (is_picked) {
             w = w - items[i-1].weight;
-        } else {
-            (*pack_indeces_ptr)[i-1] = 0;
         }
-        --i;
     }
     return  0;
 }
@@ -133,18 +129,16 @@ int main(int argc, char** argv) {
     int capacity;
     int items_num;
     Knapsack_item* items;
-    int** knaptable;
     int* pack_indeces;
     int i;
     //open input and output
     if (!readInput(inputFile, &items, &capacity, &items_num)){ //read input values
-        if (!knapsack_table(capacity, items_num, items, &knaptable)){
+        boost::dynamic_bitset<> *knaptable = new boost::dynamic_bitset<>[items_num +1];
+        if (!knapsack_table(capacity, items_num, items, knaptable)){
             if (!findOptimalPack(knaptable, items_num, capacity, &pack_indeces, items)){
                 printOutFile(outputFile, pack_indeces, items_num);
                 delete[] pack_indeces;
             }
-            for (i = 0; i < items_num; i++)
-                delete[] knaptable[i];
             delete[] knaptable;
         }
         delete[] items;
