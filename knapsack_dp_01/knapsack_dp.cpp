@@ -40,7 +40,7 @@ int readInput(FILE* input, Knapsack_item **items_ptr, int *capacity, int *item_n
 int knapsack_table(int capacity, int items_num, Knapsack_item* items, boost::dynamic_bitset<>* knaptable_bit)
 {
     int knaptable_ptr[2][capacity + 1];
-    memset(knaptable_ptr[0], 0, capacity + 1);
+    memset(knaptable_ptr[0], 0, sizeof(int) * capacity + 1);
     int i, w, j, dj;
     knaptable_bit[0].resize(capacity + 1, false);
     for (i = 1; i < items_num + 1; i++){
