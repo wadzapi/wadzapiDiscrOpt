@@ -48,7 +48,13 @@ void KnapBnbSolver::BnbDfs()  {
     if (bnb_tree != NULL)
         exit(1);
     bnb_tree = new tree<KnapsackItem*>();
-        
+    ///reorder items by value
+    //std::sort(items_ptr->begin(), items_ptr->end());
+    int i;
+    for (i = 0; i < items_ptr->size(); i++){
+        KnapsackItem tmp = (*items_ptr)[i];
+        printf("Item #%i, val = %i, weight = %i, profit = %f\n", tmp.id(), tmp.value(), tmp.weight(), tmp.profit());
+    }
 }
 
 
@@ -73,7 +79,7 @@ void KnapBnbSolver::PrintResult(FILE* outfile){
 
 void KnapBnbSolver::SolveIt(FILE* in, FILE* out){
     ReadInput(in);
-    BnbDfs();
-    FindOptimalPack();
-    PrintResult(out);
+    //BnbDfs();
+    //FindOptimalPack();
+    //PrintResult(out);
 }

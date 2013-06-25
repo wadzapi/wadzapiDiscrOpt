@@ -1,4 +1,5 @@
-#inclide "knapsack_bnb.hh"
+#include "knapsack_bnb.hh"
+#include <cstring>
 
 int main(int argc, char** argv) {
     FILE *inputFile = stdin;
@@ -29,6 +30,6 @@ int main(int argc, char** argv) {
         }
     }
     KnapBnbSolver solver;
-    solver.Solve(inputFile, outputFile);
+    solver.SolveIt(inputFile, outputFile);
     return 0;
 }
