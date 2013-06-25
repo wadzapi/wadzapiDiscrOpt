@@ -79,7 +79,7 @@ void KnapBnbSolver::PrintResult(FILE* outfile){
 
 void KnapBnbSolver::SolveIt(FILE* in, FILE* out){
     ReadInput(in);
-    //BnbDfs();
+    BnbDfs();
     //FindOptimalPack();
     //PrintResult(out);
 }

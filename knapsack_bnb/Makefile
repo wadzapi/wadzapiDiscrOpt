@@ -1,14 +1,27 @@
-all: knapSolver.o knapItem.o main.o
-	g++ -o main.o knapItem.o knapSolver.o
 
-knapItem: knapsackItem.cpp knapsackItem.hh
-	g++ -c -o knapItem.o knapsackItem.cpp
+all: main.o knapsackItem.o knapsack_bnb.o
+	g++ -o run_knapBnbSolver main.o knapsackItem.o knapsack_bnb.o
 
-knapSolver: knapsack_bnb.cpp knapsack_bnb.hh
-	g++ -c -o knapSolver.o knapsack_bnb.cpp
+main.o: main.cpp
+	g++ -c main.cpp
 
-main: main.cpp
-	g++ -c -o main.o main.cpp
+knapsack_bnb.o: knapsack_bnb.cpp knapsack_bnb.hh
+	g++ -c knapsack_bnb.cpp
+
+knapsackItem.o: knapsackItem.cpp knapsackItem.hh
+	g++ -c  knapsackItem.cpp
+
+debug: main_d.o knapsackItem_d.o knapsack_bnb_d.o
+	g++ -o run_knapBnbSolverDebug main_d.o knapsackItem_d.o knapsack_bnb_d.o
+
+main_d.o: main.cpp
+	g++ -g -c -o main_d.o main.cpp
+
+knapsack_bnb_d.o: knapsack_bnb.cpp knapsack_bnb.hh
+	g++ -g -c -o knapsack_bnb_d.o knapsack_bnb.cpp
+
+knapsackItem_d.o: knapsackItem.cpp knapsackItem.hh
+	g++ -g -c -o knapsackItem_d.o knapsackItem.cpp
 
 clean:
-	rm ./*.{o}
+	rm ./*.o
