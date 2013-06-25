@@ -38,7 +38,7 @@ void KnapBnbSolver::ReadInput(FILE* input){
     for (i = 0; i < item_num_; i++){
         fgets(inputLine, INPUT_BUFF_SIZE, input);
         sscanf(inputLine, "%i %i", &v, &w);
-        items_ptr->push_back(KnapsackItem(v, w));
+        items_ptr->push_back(KnapsackItem(i, v, w));
     }
     delete[] inputLine;
     fclose(input);
@@ -48,8 +48,8 @@ void KnapBnbSolver::BnbDfs()  {
     if (bnb_tree != NULL)
         exit(1);
     bnb_tree = new tree<KnapsackItem*>();
-    ///reorder items by value
-    //std::sort(items_ptr->begin(), items_ptr->end());
+    ///reorder items by profit (value per weight)
+    std::sort(items_ptr->begin(), items_ptr->end());
     int i;
     for (i = 0; i < items_ptr->size(); i++){
         KnapsackItem tmp = (*items_ptr)[i];

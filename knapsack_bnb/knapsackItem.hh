@@ -9,8 +9,8 @@ class KnapsackItem {
         int weight_;
         int value_;
     public:
-        KnapsackItem(int v, int w);
-        bool operator>(const KnapsackItem &oth);
+        KnapsackItem(int id, int v, int w);
+        bool operator <(const KnapsackItem &oth) const;
         int id();
         double profit();
         int weight();
