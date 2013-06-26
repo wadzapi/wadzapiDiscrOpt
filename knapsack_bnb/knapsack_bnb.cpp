@@ -47,7 +47,8 @@ void KnapBnbSolver::BnbDfs()  {
     std::sort(items_ptr->begin(), items_ptr->end());
     reverse(items_ptr->begin(), items_ptr->end());
     int res_capacity, i;
-    int lower_bound, upper_bound;
+    int lower_bound;
+    double upper_bound;
     best_value = 0;
     nodes_ = new std::stack<boost::dynamic_bitset<> >();
     ///put init node in stack
@@ -96,7 +97,16 @@ void KnapBnbSolver::BnbDfs()  {
 void KnapBnbSolver::FindOptimalPack() {
     if (pack_idxs != NULL)
         exit(1);
-    pack_idxs = new std::vector<int>();
+    pack_idxs = new std::vector<int>(item_num_);
+    int i;
+    for (i = 0; i < best_node.size(); i++) {
+        int idx = (*items_ptr)[i].id();
+        if(best_node.test(i)) {
+            pack_idxs[idx] = 1;
+        } else {
+            pack_idxs[idx] = 0;
+        }
+    }
 }
 
 void KnapBnbSolver::PrintResult(FILE* outfile){

@@ -72,7 +72,7 @@ int knapsack_table(int capacity, int items_num, Knapsack_item* items, boost::dyn
     return 0;
 }
 
-int findOptimalPack(boost::dynamic_bitset<> *knaptable, int items_num, int capacity, int** pack_indeces_ptr, Knapsack_item *items){
+int findOptimalPack(boost::dynamic_bitset<> *knaptable, int items_num, int capacity, int** pack_indeces_ptr, Knapsack_item *items, int *num_packed){
     (*pack_indeces_ptr) = new int[items_num];
     if ((*pack_indeces_ptr) == NULL){
         return 1;
@@ -80,18 +80,20 @@ int findOptimalPack(boost::dynamic_bitset<> *knaptable, int items_num, int capac
     //Traceback
     int w = capacity;
     int i = items_num;
+    *num_packed = 0;
     for (i = items_num; i > 0; i--) {
         bool is_picked = knaptable[i].test(w);
         (*pack_indeces_ptr)[i-1] = is_picked;
         if (is_picked) {
             w = w - items[i-1].weight;
+            ++(*num_packed);
         }
     }
     return  0;
 }
 
-int printOutFile(FILE* outfile, int* pack_indeces, int idx_num){
-    fprintf(outfile, "%i %i\n", idx_num , 1);
+int printOutFile(FILE* outfile, int* pack_indeces, int idx_num, int num_packed){
+    fprintf(outfile, "%i %i\n", num_packed, 1);
     int i;
     for (i = 0; i < idx_num - 1; i++){
         fprintf(outfile, "%i ", pack_indeces[i]);
@@ -134,14 +136,14 @@ int main(int argc, char** argv) {
     int capacity;
     int items_num;
     Knapsack_item* items;
-    int* pack_indeces;
+    int* pack_indeces, num_packed;
     int i;
     //open input and output
     if (!readInput(inputFile, &items, &capacity, &items_num)){ //read input values
         boost::dynamic_bitset<> *knaptable = new boost::dynamic_bitset<>[items_num +1];
         if (!knapsack_table(capacity, items_num, items, knaptable)){
-            if (!findOptimalPack(knaptable, items_num, capacity, &pack_indeces, items)){
-                printOutFile(outputFile, pack_indeces, items_num);
+            if (!findOptimalPack(knaptable, items_num, capacity, &pack_indeces, items, &num_packed)){
+                printOutFile(outputFile, pack_indeces, items_num, num_packed);
                 delete[] pack_indeces;
             }
             delete[] knaptable;
