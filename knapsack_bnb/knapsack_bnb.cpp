@@ -46,26 +46,50 @@ void KnapBnbSolver::BnbDfs()  {
     ///The Horowitz-Sahni algorithm used
     std::sort(items_ptr->begin(), items_ptr->end());
     reverse(items_ptr->begin(), items_ptr->end());
-    int residual_capacity = this->capacity_;
-    int curr_value = 0;
-    int best_value = 0;
+    int res_capacity, i;
+    int lower_bound, upper_bound;
+    //int best_value = 0;
+    //boost::dynamic_bitset<> best_node;
     nodes_ = new std::stack<boost::dynamic_bitset<> >();
     ///put init node in stack
     nodes_->push(boost::dynamic_bitset<>(0));
     while (nodes_->size() > 0) {
         boost::dynamic_bitset<> curr_mask = nodes_->top();
         nodes_->pop();
-        //calc current solution value
-        int num_items = curr_mask.size();
-        printf("%i", num_items);  
-        
-        //calc upper profit bound
-        //calc lower profit bound
-        //calc residual capacity
-        //if() {
-            //nodes_->push();//rigtht subtree
-            //nodes_->push();//left sutbree
-        //}
+        int curr_items_num = curr_mask.size();
+        lower_bound = 0;
+        res_capacity = this->capacity_;
+        for (i = 0; i < curr_items_num; i++) {
+            //calc lower profit bound and residual capacity
+            if(curr_mask.test(i)) {
+                lower_bound += (*items_ptr)[i].value();
+                res_capacity -= (*items_ptr)[i].weight();
+            }
+        }
+        if (res_capacity > 0) {
+            //calc upper profit bound
+            upper_bound = lower_bound;
+            int add_weight = 0;
+            for (i = 0; i < (item_num_ - curr_items_num); i++) {
+                    int curr_idx = item_num_ + i;
+                    add_weight += (*items_ptr)[curr_idx].weight();
+                    upper_bound += (*items_ptr)[curr_idx].value();
+                    if (add_weight > res_capacity) {
+                        upper_bound -= (*items_ptr)[curr_idx].profit() * (add_weight - res_capacity);
+                        break;
+                    }
+                }
+            if (lower_bound > best_value) {
+                best_value = lower_bound;
+                best_node = curr_mask;
+            }
+            if (upper_bound > best_value) {
+                curr_mask.push_back(false);
+                nodes_->push(curr_mask);
+                curr_mask.set(curr_mask.size() - 1, true);
+                nodes_->push(curr_mask);
+            }
+        }
     }
 }
 
