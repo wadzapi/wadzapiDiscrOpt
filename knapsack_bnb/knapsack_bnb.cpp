@@ -66,7 +66,7 @@ void KnapBnbSolver::BnbDfs()  {
                 res_capacity -= (*items_ptr)[i].weight();
             }
         }
-        if (res_capacity > 0) {
+        if (res_capacity >= 0) {
             //calc upper profit bound
             upper_bound = lower_bound;
             int add_weight = 0;
