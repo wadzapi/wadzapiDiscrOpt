@@ -78,8 +78,8 @@ void KnapBnbSolver::BnbDfs()  {
                         upper_bound -= (*items_ptr)[curr_idx].profit() * (add_weight - res_capacity);
                         break;
                     }
-                }
-            if (lower_bound > best_value) {
+            }
+            if (lower_bound >= best_value) {
                 best_value = lower_bound;
                 best_node = curr_mask;
             }
