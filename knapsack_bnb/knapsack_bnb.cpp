@@ -48,8 +48,7 @@ void KnapBnbSolver::BnbDfs()  {
     reverse(items_ptr->begin(), items_ptr->end());
     int res_capacity, i;
     int lower_bound, upper_bound;
-    //int best_value = 0;
-    //boost::dynamic_bitset<> best_node;
+    best_value = 0;
     nodes_ = new std::stack<boost::dynamic_bitset<> >();
     ///put init node in stack
     nodes_->push(boost::dynamic_bitset<>(0));
@@ -71,7 +70,7 @@ void KnapBnbSolver::BnbDfs()  {
             upper_bound = lower_bound;
             int add_weight = 0;
             for (i = 0; i < (item_num_ - curr_items_num); i++) {
-                    int curr_idx = item_num_ + i;
+                    int curr_idx = curr_items_num + i;
                     add_weight += (*items_ptr)[curr_idx].weight();
                     upper_bound += (*items_ptr)[curr_idx].value();
                     if (add_weight > res_capacity) {
