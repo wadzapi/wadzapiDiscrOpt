@@ -13,6 +13,7 @@ class KnapBnbSolver {
         int capacity_;
         int item_num_;
         int best_value;
+        int num_packed_;
         boost::dynamic_bitset<> best_node;
         std::vector<KnapsackItem>* items_ptr;
         std::stack<boost::dynamic_bitset<> >* nodes_;

@@ -10,7 +10,7 @@ KnapBnbSolver::~KnapBnbSolver(){
     if (items_ptr != NULL)
         delete(items_ptr);
     if (pack_idxs != NULL)
-        delete(items_ptr);
+        delete(pack_idxs);
 }
 
 void KnapBnbSolver::ReadInput(FILE* input){
@@ -99,12 +99,14 @@ void KnapBnbSolver::FindOptimalPack() {
         exit(1);
     pack_idxs = new std::vector<int>(item_num_);
     int i;
+    num_packed_ = 0;
     for (i = 0; i < best_node.size(); i++) {
         int idx = (*items_ptr)[i].id();
         if(best_node.test(i)) {
-            pack_idxs[idx] = 1;
+            (*pack_idxs)[idx] = 1;
+            ++num_packed_;
         } else {
-            pack_idxs[idx] = 0;
+            (*pack_idxs)[idx] = 0;
         }
     }
 }
@@ -113,7 +115,7 @@ void KnapBnbSolver::PrintResult(FILE* outfile){
     if (outfile == NULL)
         exit(1);
     int idx_num = pack_idxs->size();
-    fprintf(outfile, "%i %i\n", idx_num, 1);
+    fprintf(outfile, "%i %i\n", num_packed_, 1);
     int i;
     for (i = 0; i < idx_num - 1; i++){
         fprintf(outfile, "%i ", (*pack_idxs)[i]);
@@ -125,6 +127,6 @@ void KnapBnbSolver::PrintResult(FILE* outfile){
 void KnapBnbSolver::SolveIt(FILE* in, FILE* out){
     ReadInput(in);
     BnbDfs();
-    //FindOptimalPack();
-    //PrintResult(out);
+    FindOptimalPack();
+    PrintResult(out);
 }
