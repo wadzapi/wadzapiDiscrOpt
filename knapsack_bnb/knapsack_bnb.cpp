@@ -1,9 +1,9 @@
 #include "knapsack_bnb.hh"
+#include <algorithm>
 
 KnapBnbSolver::KnapBnbSolver()
     : items_ptr(NULL),
-      pack_idxs(NULL),
-      bnb_tree(NULL) {
+      pack_idxs(NULL) {
 }
 
 KnapBnbSolver::~KnapBnbSolver(){
@@ -11,8 +11,6 @@ KnapBnbSolver::~KnapBnbSolver(){
         delete(items_ptr);
     if (pack_idxs != NULL)
         delete(items_ptr);
-    if (bnb_tree != NULL)
-        delete(bnb_tree);
 }
 
 void KnapBnbSolver::ReadInput(FILE* input){
@@ -45,15 +43,29 @@ void KnapBnbSolver::ReadInput(FILE* input){
 }
 
 void KnapBnbSolver::BnbDfs()  {
-    if (bnb_tree != NULL)
-        exit(1);
-    bnb_tree = new tree<KnapsackItem*>();
-    ///reorder items by profit (value per weight)
+    ///The Horowitz-Sahni algorithm used
     std::sort(items_ptr->begin(), items_ptr->end());
-    int i;
-    for (i = 0; i < items_ptr->size(); i++){
-        KnapsackItem tmp = (*items_ptr)[i];
-        printf("Item #%i, val = %i, weight = %i, profit = %f\n", tmp.id(), tmp.value(), tmp.weight(), tmp.profit());
+    reverse(items_ptr->begin(), items_ptr->end());
+    int residual_capacity = this->capacity_;
+    int curr_value = 0;
+    int best_value = 0;
+    nodes_ = new std::stack<boost::dynamic_bitset<> >();
+    ///put init node in stack
+    nodes_->push(boost::dynamic_bitset<>(0));
+    while (nodes_->size() > 0) {
+        boost::dynamic_bitset<> curr_mask = nodes_->top();
+        nodes_->pop();
+        //calc current solution value
+        int num_items = curr_mask.size();
+        printf("%i", num_items);  
+        
+        //calc upper profit bound
+        //calc lower profit bound
+        //calc residual capacity
+        //if() {
+            //nodes_->push();//rigtht subtree
+            //nodes_->push();//left sutbree
+        //}
     }
 }
 

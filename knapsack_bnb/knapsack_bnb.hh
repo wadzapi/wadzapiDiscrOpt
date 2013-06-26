@@ -4,7 +4,8 @@
 #include "knapsackItem.hh"
 #include <vector>
 #include <cstdio>
-#include "tree.hh"
+#include <stack>
+#include <boost/dynamic_bitset.hpp>
 
 
 class KnapBnbSolver {
@@ -12,7 +13,7 @@ class KnapBnbSolver {
         int capacity_;
         int item_num_;
         std::vector<KnapsackItem>* items_ptr;
-        tree<KnapsackItem*>* bnb_tree;
+        std::stack<boost::dynamic_bitset<> >* nodes_;
         std::vector<int>* pack_idxs;
         void ReadInput(FILE *in_file);
         void BnbDfs();
