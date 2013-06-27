@@ -17,3 +17,5 @@ maind.o: main.cpp
 graphd.o: graph.cpp graph.hh
 	g++ -g -c -o graphd.o graph.cpp
 
+clean:
+	rm ./*.o
