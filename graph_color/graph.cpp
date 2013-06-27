@@ -16,19 +16,24 @@ void GraphNode::SetColour(size_t colour_id) {
     colour_id_ = colour_id;
 }
 
-Graph::Graph() : vertices_(NULL), adjList_(NULL) {
+Graph::Graph() : is_built_(false) {
 }
 
-Graph::Graph(size_t num_verts) {
+Graph::Graph(size_t num_verts): is_built_(false) {
+    Build(num_verts);
+}
+
+void Graph::Build(size_t num_verts) {
     vertices_ = new GraphNode[num_verts];
     adjList_ = new std::set<GraphNode*>[num_verts];
+    is_built_ = true;
 }
 
 Graph::~Graph(){
-    if (adjList_ != NULL)
+    if (is_built_) {
         delete[] adjList_;
-    if (vertices_ != NULL)
         delete[] vertices_;
+    }
 }
 
 void Graph::ReadFromFile(FILE* in_file){
@@ -36,7 +41,8 @@ void Graph::ReadFromFile(FILE* in_file){
     //read first line
     fgets(inputLine, INPUT_BUFF_SIZE, in_file);
     if (inputLine != NULL) {
-        sscanf(inputLine, "%i %i", &num_verts_, &num_edges_); 
+        sscanf(inputLine, "%i %i", &num_verts_, &num_edges_);
+        Build(num_verts_); 
         int i, u, v;
         for (i = 0; i < num_edges_; i++) {
             fgets(inputLine, INPUT_BUFF_SIZE, in_file);
