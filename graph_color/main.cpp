@@ -1,4 +1,4 @@
-#include "graph.hh"
+#include "colgr_adjlist.hh"
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>

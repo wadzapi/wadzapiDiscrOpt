@@ -5,8 +5,8 @@ all: main.o graph.o
 main.o: main.cpp
 	g++ -c main.cpp
 
-graph.o: graph.cpp graph.hh
-	g++ -c graph.cpp
+graph.o: colgr_adjlist.cpp colgr_adjlist.hh
+	g++ -c colgr_adjlist.cpp
 
 debug: maind.o graphd.o
 	g++ -g -o run_gr_colord maind.o graphd.o
@@ -14,8 +14,8 @@ debug: maind.o graphd.o
 maind.o: main.cpp
 	g++ -g -c -o maind.o main.cpp
 
-graphd.o: graph.cpp graph.hh
-	g++ -g -c -o graphd.o graph.cpp
+graphd.o: colgr_adjlist.cpp colgr_adjlist.hh
+	g++ -g -c -o graphd.o colgr_adjlist.cpp
 
 clean:
 	rm ./*.o
