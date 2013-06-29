@@ -5,5 +5,4 @@
 //seqeunce of color - ids of vertexes ordered by number of
 //vertices with the same color
 // like 013;24;5 for 3 color coloring
-//для случая раскраски эквивалентно генерации всех возможных сочетаний
 

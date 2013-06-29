@@ -67,3 +67,9 @@ void Graph::addEdge(size_t id1, size_t id2){
     adjList_[id1].insert((vertices_ + id2));
     adjList_[id2].insert((vertices_ + id1));
 }
+
+ColorScheme Graph::GetColors() {
+    ColorScheme cols = new GraphNode[num_verts_];
+    memcpy(cols, vertices_, sizeof(GraphNode) * num_verts_);
+    return cols;
+}
