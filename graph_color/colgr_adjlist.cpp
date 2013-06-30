@@ -78,13 +78,16 @@ size_t Graph::Degree(size_t node_id) {
     return adjList_[node_id].size();
 }
 
-int Graph::CmpNodeDegree(size_t id1, size_t id2) {
+bool Graph::CmpNodeDegree(size_t id1, size_t id2) {
     size_t dgr1 = Degree(id1);
     size_t dgr2 = Degree(id2);
-    if (dgr1 < dgr2)
-        return -1;
-    if (dgr1 == dgr2)
-        return 0;
-    if (dgr1 > dgr2)
-        return 1;
+    return (dgr1 > dgr2);
+}
+
+size_t Graph::VertsNum() {
+    return num_verts_;
+}
+
+size_t Graph::EdgesNum() {
+    return num_edges_;
 }

@@ -1,4 +1,5 @@
 #include "colgr_adjlist.hh"
+#include "solver.hh"
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -34,5 +35,7 @@ int main(int argc, char** argv) {
     }
     Graph graph;
     graph.ReadFromFile(inputFile);
+    GCPSolver solver;
+    solver.Solve(&graph);
     return 0;
 }

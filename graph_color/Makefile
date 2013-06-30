@@ -11,7 +11,7 @@ graph.o: colgr_adjlist.cpp colgr_adjlist.hh
 solver.o: solver.hh solver.cpp
 	g++ -c -o solver.o solver.cpp
 
-debug: maind.o graphd.o
+debug: maind.o graphd.o solverd.o
 	g++ -g -o run_gr_colord maind.o graphd.o solverd.o
 
 maind.o: main.cpp

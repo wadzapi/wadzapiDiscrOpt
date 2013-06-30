@@ -16,7 +16,6 @@ class Graph{
         size_t num_edges_;
         std::set<GraphNode*>* adjList_;
         bool is_built_;
-        void InitVerts();
     public:
         Graph();
         ~Graph();
@@ -28,7 +27,10 @@ class Graph{
         bool isAdjacent(size_t id1, size_t id_2);
         ColorScheme GetColors();
         size_t Degree(size_t node_id);
-        int CmpNodeDegree(size_t id1, size_t id2);
+        bool CmpNodeDegree(size_t id1, size_t id2);
+        void InitVerts();
+        size_t VertsNum();
+        size_t EdgesNum();
 };
 
 #endif
