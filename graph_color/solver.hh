@@ -7,7 +7,8 @@ class GCPSolver {
         size_t upper_bound_;
         bool IsFeasible(ColorScheme col);
         void GlobalSearch();
-        std::set<GraphNode*>* MaxClique();
+        std::set<GraphNode*>* MaxClique(size_t num_iters);
+        std::set<GraphNode*>* Clique();
         void ColLF();
         void  ColDSATUR(); 
         

@@ -21,7 +21,7 @@ graphd.o: colgr_adjlist.cpp colgr_adjlist.hh
 	g++ -g -c -o graphd.o colgr_adjlist.cpp
 
 solverd.o: solver.hh solver.cpp
-	g++ -c -o solverd.o solver.cpp
+	g++ -g -c -o solverd.o solver.cpp
 
 clean:
 	rm ./*.o
