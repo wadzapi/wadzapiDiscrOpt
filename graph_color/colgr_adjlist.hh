@@ -27,6 +27,8 @@ class Graph{
         void addEdge(size_t id1, size_t id2);
         bool isAdjacent(size_t id1, size_t id_2);
         ColorScheme GetColors();
+        size_t Degree(size_t node_id);
+        int CmpNodeDegree(size_t id1, size_t id2);
 };
 
 #endif

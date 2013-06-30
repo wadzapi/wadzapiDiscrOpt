@@ -1,19 +1,20 @@
 #include "colgr_adjlist.hh"
 
-class GCPSolver01 {
+class GCPSolver {
     private: 
         Graph* graph;
         size_t lower_bound;
         size_t upper_bound;
-        isFeasible(ColorScheme col);
-        void globalSearch();
-        std::set<GraphNode*> MaxClique();
+        bool IsFeasible(ColorScheme col);
+        void GlobalSearch();
+        std::set<GraphNode*>* MaxClique();
         ColorScheme ColLF();
         ColorScheme  ColDSATUR(); 
         
         
+        
     public:
-        GCPSolver01();
-        ~GCPSolver01();
-        Void Solve(Graph* gr);
+        GCPSolver();
+        ~GCPSolver();
+        void Solve(Graph* gr);
 };
