@@ -123,6 +123,49 @@ size_t GCPSolver::ColLF() {
 }
 
 size_t GCPSolver::ColDSATUR() {
+    graph_->InitVerts();//clear coloring
+    size_t colors_num = 0;
+    size_t verts_num = graph_->VertsNum();
+    std::vector<size_t> perm_order;
+    size_t i;
+    for (i = 0; i < verts_num; i++) {
+        perm_order.push_back(i);
+    }
+    std::sort(perm_order.begin(), perm_order.end(), boost::bind(&Graph::CmpNodeDegree, graph_, _1, _2));
+    for (i = 0; i < verts_num; i++) {
+        ///find mode with max saturation 
+        std::vector<size_t>::iterator it;
+        std::vector<size_t>::iterator max_sat;
+        size_t max_sat_val = 0;
+        for (it = perm_order.begin(); it != perm_order.end(); ++it) {
+            size_t curr_sat_val = graph_->Saturation(*it);
+            if (curr_sat_val > max_sat_val) {
+                max_sat_val = curr_sat_val;
+                max_sat = it;
+            }
+        }
+        std::set<GraphNode*>* adj_verts = graph_->adjacent_verts(*max_sat);
+        //find first nonconflicting color
+        size_t color_id = 0;
+        bool conflicting = true;
+        while (conflicting){
+            conflicting = false;
+            ++color_id;
+            std::set<GraphNode*>::iterator it;
+            for (it = adj_verts->begin(); it != adj_verts->end(); ++it) {
+                size_t adj_col = **it;
+                if (color_id == adj_col){
+                    conflicting = true;
+                    break;
+                }
+            }
+        }
+        *(graph_->Node(*max_sat)) = color_id;//coloring the node
+        if (color_id > colors_num)
+            colors_num = color_id;
+        perm_order.erase(max_sat);
+    }
+    return colors_num; 
 }
 
 void GCPSolver::Solve(Graph* gr) {
