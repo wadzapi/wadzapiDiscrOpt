@@ -3,10 +3,10 @@ all: main.o graph.o solver.o
 	g++ -o run_gr_color main.o graph.o solver.o
 
 main.o: main.cpp
-	g++ -c main.cpp
+	g++ -c -o main.o main.cpp
 
 graph.o: colgr_adjlist.cpp colgr_adjlist.hh
-	g++ -c colgr_adjlist.cpp
+	g++ -c -o graph.o colgr_adjlist.cpp
 
 solver.o: solver.hh solver.cpp
 	g++ -c -o solver.o solver.cpp

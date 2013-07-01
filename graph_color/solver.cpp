@@ -173,10 +173,10 @@ void GCPSolver::Solve(Graph* gr) {
     //find lower bound, heuristic for max clique
     lower_bound_ = MaxClique(9);
     //find upper bound by coloring with some heuristic
-    upper_bound_ = ColLF();
-    //upper_bound_ = ColDSATUR();
+    //upper_bound_ = ColLF();
+    upper_bound_ = ColDSATUR();
     ColorScheme col_heur = graph_->GetColors(); //save heuristic coloring
-    graph_->InitVerts();//clear coloring
+    //graph_->InitVerts();//clear coloring
     //GlobalSearch();
     //ColorScheme col_search = graph_->GetColors(); //save search coloring
 }
