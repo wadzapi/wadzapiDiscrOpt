@@ -112,3 +112,37 @@ size_t Graph::EdgesNum() {
 GraphNode* Graph::Node(size_t idx) {
     return (vertices_ + idx);
 }
+
+size_t Graph::ColorsNum(ColorScheme coloring, size_t color_size) {
+    std::set<size_t> colors;
+    for (size_t i = 0; i < color_size; i++) {
+        colors.insert(coloring[i]);
+    }
+    return colors.size();
+}
+
+void Graph::SetColors(ColorScheme coloring) {
+    //!!!coloring should be the same size as the vertices_!!!
+    if (vertices_ != NULL) {
+        delete[] vertices_;
+    }
+    vertices_ = coloring;
+}
+
+void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num) {
+    if (out_file == NULL) {
+        return;
+    }
+    size_t colors_num = Graph::ColorsNum(coloring, color_num);
+    bool opt_flag = 0;
+    fprintf(out_file, "%i ", colors_num); //num of used colors
+    fprintf(out_file, "%i\n", opt_flag); //optimality proved flag
+    for (size_t i = 0; i < color_num - 1; i++) {
+        fprintf(out_file, "%i ", coloring[i]);
+    }
+    fprintf(out_file, "%i", coloring[color_num -1]);
+}
+
+void Graph::PrintColors(FILE* out_file) {
+    Graph::PrintColorScheme(out_file, vertices_, num_verts_);
+}

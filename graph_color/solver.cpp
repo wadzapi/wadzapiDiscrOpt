@@ -175,7 +175,8 @@ void GCPSolver::Solve(Graph* gr) {
     //find upper bound by coloring with some heuristic
     upper_bound_ = ColLF();
     //upper_bound_ = ColDSATUR();
-    ColorScheme col_heur = graph_->GetColors();//save colors
+    ColorScheme col_heur = graph_->GetColors(); //save heuristic coloring
     graph_->InitVerts();//clear coloring
-    GlobalSearch();
+    //GlobalSearch();
+    //ColorScheme col_search = graph_->GetColors(); //save search coloring
 }

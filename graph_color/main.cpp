@@ -37,5 +37,6 @@ int main(int argc, char** argv) {
     graph.ReadFromFile(inputFile);
     GCPSolver solver;
     solver.Solve(&graph);
+    graph.PrintColors(outputFile);
     return 0;
 }

@@ -11,8 +11,7 @@ class GCPSolver {
         size_t MaxClique(size_t num_iters);
         std::set<GraphNode*>* Clique();
         size_t ColLF();
-        size_t  ColDSATUR(); 
-        
+        size_t ColDSATUR();
         
         
     public:
