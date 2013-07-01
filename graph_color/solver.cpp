@@ -47,10 +47,10 @@ std::set<GraphNode*>* GCPSolver::Clique() {
     }
     //generete random permutation
     random_shuffle(perm_idx.begin(), perm_idx.end());
-    for (i = 0; i < num_verts; i++) {
-        //add init vals into clique
-        clique->insert((*graph_).Node(perm_idx[0]));
-        perm_idx.erase(perm_idx.begin());
+    //add init vals into clique
+    //clique->insert((*graph_).Node(perm_idx[0]));
+    //perm_idx.erase(perm_idx.begin());
+    while(perm_idx.size() > 0) {
         //find other idx to insert in clique
         size_t max_intersects = 0;
         std::vector<size_t>::iterator add_idx = perm_idx.begin();
@@ -70,12 +70,13 @@ std::set<GraphNode*>* GCPSolver::Clique() {
         }
         //add to clique
         clique->insert((*graph_).Node(*add_idx));
-        perm_idx.erase(add_idx); 
+        std::set<GraphNode*>* curr_adjs = graph_->adjacent_verts(*add_idx);
+        //perm_idx.erase(add_idx); 
         //intersect current set with adj to new
         for (it = perm_idx.begin(); it != perm_idx.end(); ++it) {
-            std::set<GraphNode*>* curr_adjs = graph_->adjacent_verts(*add_idx);
             if (curr_adjs->find((*graph_).Node(*it)) == curr_adjs->end()){
                 perm_idx.erase(it);
+                --it;
             } 
         }
     }
