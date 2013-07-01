@@ -31,6 +31,7 @@ class Graph{
         void InitVerts();
         size_t VertsNum();
         size_t EdgesNum();
+        GraphNode* Node(size_t idx); 
 };
 
 #endif

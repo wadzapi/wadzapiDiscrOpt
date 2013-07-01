@@ -91,3 +91,7 @@ size_t Graph::VertsNum() {
 size_t Graph::EdgesNum() {
     return num_edges_;
 }
+
+GraphNode* Graph::Node(size_t idx) {
+    return (vertices_ + idx);
+}

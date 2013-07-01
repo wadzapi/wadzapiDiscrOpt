@@ -22,11 +22,11 @@ void GCPSolver::GlobalSearch() {
 }
 
 std::set<GraphNode*>* GCPSolver::MaxClique(size_t num_iters) {
-    std::set<GraphNode*>* max_clique = new set<GraphNode*>(); 
+    std::set<GraphNode*>* max_clique = new std::set<GraphNode*>(); 
     std::set<GraphNode*>* clique;
     for (int i = 0; i < num_iters; i++) {
         clique = Clique();
-        if (clique.size() > max_clique.size()) {
+        if (clique->size() > max_clique->size()) {
             delete max_clique;
             max_clique = clique;
         } else {
@@ -49,16 +49,17 @@ std::set<GraphNode*>* GCPSolver::Clique() {
     random_shuffle(perm_idx.begin(), perm_idx.end());
     for (i = 0; i < num_verts; i++) {
         //add init vals into clique
-        clique->insert(perm_idx[0]);
+        clique->insert((*graph_).Node(perm_idx[0]));
         perm_idx.erase(perm_idx.begin());
         //find other idx to insert in clique
         size_t max_intersects = 0;
-        size_t *add_idx = perm_idx.begin();
+        std::vector<size_t>::iterator add_idx = perm_idx.begin();
+        std::vector<size_t>::iterator it;
         for (std::vector<size_t>::iterator it = perm_idx.begin(); it != perm_idx.end(); ++it) {
             //count number of adjacent to vert indxs in curr clique
             std::set<GraphNode*> intersects;
-            std::set<GraphNode*> curr_adjs = graph_->adjacent_verts(*it);
-            set_intersection(curr_adjs.begin(), curr_adjs.end(), clique.begin(), clique.end(), std::inserter(intersects, intersects.begin()));
+            std::set<GraphNode*>* curr_adjs = graph_->adjacent_verts(*it);
+            set_intersection(curr_adjs->begin(), curr_adjs->end(), clique->begin(), clique->end(), std::inserter(intersects, intersects.begin()));
             size_t num_intersects = intersects.size();
             if (num_intersects > max_intersects) {
                 max_intersects = num_intersects;
@@ -68,9 +69,15 @@ std::set<GraphNode*>* GCPSolver::Clique() {
                 break; 
         }
         //add to clique
-        clique.insert((vertices_ + *add_idx));
+        clique->insert((*graph_).Node(*add_idx));
         perm_idx.erase(add_idx); 
-    }
+        //intersect current set with adj to new
+        for (it = perm_idx.begin(); it != perm_idx.end(); ++it) {
+            std::set<GraphNode*> curr_adjs = graph_->adjacent_verts(*add_idx);
+            if (curr_adjs.find(vertices_[*it]) == curr_adjs.end()){
+                perm_idx.erase(it);
+            } 
+        }
     return clique;
 }
 
