@@ -65,7 +65,7 @@ std::set<GraphNode*>* GCPSolver::Clique() {
                 max_intersects = num_intersects;
                 add_idx = it;
             }
-            if (max_intersects == clique_size())
+            if (max_intersects == clique->size())
                 break; 
         }
         //add to clique
@@ -73,11 +73,12 @@ std::set<GraphNode*>* GCPSolver::Clique() {
         perm_idx.erase(add_idx); 
         //intersect current set with adj to new
         for (it = perm_idx.begin(); it != perm_idx.end(); ++it) {
-            std::set<GraphNode*> curr_adjs = graph_->adjacent_verts(*add_idx);
-            if (curr_adjs.find(vertices_[*it]) == curr_adjs.end()){
+            std::set<GraphNode*>* curr_adjs = graph_->adjacent_verts(*add_idx);
+            if (curr_adjs->find((*graph_).Node(*it)) == curr_adjs->end()){
                 perm_idx.erase(it);
             } 
         }
+    }
     return clique;
 }
 
