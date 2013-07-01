@@ -78,10 +78,27 @@ size_t Graph::Degree(size_t node_id) {
     return adjList_[node_id].size();
 }
 
+size_t Graph::Saturation(size_t node_id) {
+    std::set<GraphNode*>* adj_verts = adjList_ + node_id;
+    std::set<size_t> adj_colors;
+    std::set<GraphNode*>::iterator it;
+    for (it = adj_verts->begin(); it != adj_verts->end(); ++it) {
+        size_t adj_color = **it;
+        adj_colors.insert(adj_color);
+    }
+    return adj_colors.size();
+}
+
 bool Graph::CmpNodeDegree(size_t id1, size_t id2) {
     size_t dgr1 = Degree(id1);
     size_t dgr2 = Degree(id2);
     return (dgr1 > dgr2);
+}
+
+bool Graph::CmpNodeSaturation(size_t id1, size_t id2) {
+    size_t sat1 = Saturation(id1);
+    size_t sat2 = Saturation(id2);
+    return (sat1 > sat2);
 }
 
 size_t Graph::VertsNum() {

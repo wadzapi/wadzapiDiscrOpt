@@ -26,12 +26,14 @@ class Graph{
         void addEdge(size_t id1, size_t id2);
         bool isAdjacent(size_t id1, size_t id_2);
         ColorScheme GetColors();
-        size_t Degree(size_t node_id);
         bool CmpNodeDegree(size_t id1, size_t id2);
+        bool CmpNodeSaturation(size_t id1, size_t id2);
         void InitVerts();
         size_t VertsNum();
         size_t EdgesNum();
         GraphNode* Node(size_t idx); 
+        size_t Degree(size_t node_id);
+        size_t Saturation(size_t node_id);
 };
 
 #endif
