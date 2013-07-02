@@ -37,6 +37,7 @@ class Graph{
         size_t Degree(size_t node_id);
         size_t Saturation(size_t node_id);
         void PrintColors(FILE* out_file);
+        bool IsLeaf(ColorScheme coloring);
         static std::vector<size_t>* CountColors(ColorScheme coloring, size_t col_size);
         static size_t ColorsNum(ColorScheme coloring, size_t color_size);
         static void PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num);

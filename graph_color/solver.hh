@@ -13,6 +13,7 @@ class GCPSolver {
         size_t ColLF();
         size_t ColDSATUR();
         bool IsFeasible(ColorScheme coloring, size_t dest_cols);
+        bool ColorNumConsistency(ColorScheme coloring, size_t dest_cols);
         bool ColorSeqConsistency(ColorScheme coloring, size_t dest_cols);
         bool ColorArcConsistency(ColorScheme coloring);
         bool BinarySearch(size_t eps);

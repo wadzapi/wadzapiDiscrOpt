@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <vector>
 #include <cstdlib>
+#include <stack>
+
 
 //breaking symmetry by coding like lexicographic ordered 
 //seqeunce of color - ids of vertexes ordered by number of
@@ -27,7 +29,7 @@ bool GCPSolver::IsFeasible(ColorScheme coloring, size_t dest_cols) {
     return false;
 }
 
-bool GCPSolver::ColorSeqConsistency(ColorScheme coloring, size_t dest_cols) {
+bool GCPSolver::ColorNumConsistency(ColorScheme coloring, size_t dest_cols) {
     ///calc number of uses for every color
     std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
     size_t num_cols = color_counter->size() - 1;
@@ -36,6 +38,14 @@ bool GCPSolver::ColorSeqConsistency(ColorScheme coloring, size_t dest_cols) {
         delete color_counter;
         return false;
     }
+    delete color_counter;
+    return true;
+}
+
+bool GCPSolver::ColorSeqConsistency(ColorScheme coloring, size_t dest_cols) {
+    ///calc number of uses for every color
+    std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
+    size_t num_cols = color_counter->size() - 1;
     for (int i = 1; i < num_cols; i++) {
         if (color_counter->at(i) < color_counter->at(i+1)) {
             delete color_counter;
@@ -81,7 +91,30 @@ bool GCPSolver::BinarySearch(size_t eps) {
 
 bool GCPSolver::MidSearch(size_t mid_point, ColorScheme* coloring) {
     bool isFound = false;
-    //search with constraints
+    std::stack<ColorSheme> color_stack;
+    size_t verts_num = graph_->VertsNum();
+    std::vector<size_t> perm_order;
+    size_t i;
+    for (i = 0; i < verts_num; i++) {
+        perm_order.push_back(i);
+    }
+    std::sort(perm_order.begin(), perm_order.end(), boost::bind(&Graph::CmpNodeDegree, graph_, _1, _2));
+    for (i = 0; i < verts_num; i++) {
+        ///find mode with max saturation
+        std::vector<size_t>::iterator it;
+        std::vector<size_t>::iterator max_sat;
+        size_t max_sat_val = 0;
+        for (it = perm_order.begin(); it != perm_order.end(); ++it) {
+            size_t curr_sat_val = graph_->Saturation(*it);
+            if (curr_sat_val > max_sat_val) {
+                max_sat_val = curr_sat_val;
+                max_sat = it;
+            }
+        }
+        
+    } 
+    
+
     if (isFound) {
         ColorScheme coloring = new GraphNode[graph_->VertsNum()];
         //construct color scheme

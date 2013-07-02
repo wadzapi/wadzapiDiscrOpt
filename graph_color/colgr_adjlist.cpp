@@ -170,3 +170,14 @@ std::vector<size_t>* Graph::CountColors(ColorScheme coloring, size_t col_size) {
     }
     return color_counter;
 }
+
+bool Graph::IsLeaf(ColorScheme coloring) {
+    std::vector<size_t> color_scheme(coloring, coloring + num_verts_);
+    std::vector<size_t>::iterator it;
+    for (it = color_scheme.begin(); it != color_scheme.end(); ++it) {
+        if (**it == 0) {
+            return false;
+        }
+     }
+    return true'
+}
