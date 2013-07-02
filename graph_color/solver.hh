@@ -12,7 +12,11 @@ class GCPSolver {
         std::set<GraphNode*>* Clique();
         size_t ColLF();
         size_t ColDSATUR();
-        
+        bool IsFeasible(ColorScheme coloring, size_t dest_cols);
+        bool ColorSeqConsistency(ColorScheme coloring, size_t dest_cols);
+        bool ColorArcConsistency(ColorScheme coloring);
+        bool BinarySearch(size_t eps);
+        bool MidSearch(size_t mid_point, ColorScheme* coloring);
         
     public:
         GCPSolver();

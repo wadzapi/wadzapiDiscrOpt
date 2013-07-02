@@ -18,11 +18,78 @@ GCPSolver::~GCPSolver() {
     }
 }
 
-bool GCPSolver::IsFeasible(ColorScheme col) {
+bool GCPSolver::IsFeasible(ColorScheme coloring, size_t dest_cols) {
+    if (ColorSeqConsistency(coloring, dest_cols)) {
+        if (ColorArcConsistency(coloring)) {
+            return true;
+        }
+    }
+    return false;
 }
 
-void GCPSolver::GlobalSearch() {
+bool GCPSolver::ColorSeqConsistency(ColorScheme coloring, size_t dest_cols) {
+    ///calc number of uses for every color
+    std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
+    size_t num_cols = color_counter->size() - 1;
+    size_t num_uncolored = color_counter->front();
+    if (num_cols > dest_cols || num_cols + num_uncolored <  dest_cols) {
+        delete color_counter;
+        return false;
+    }
+    for (int i = 1; i < num_cols; i++) {
+        if (color_counter->at(i) < color_counter->at(i+1)) {
+            delete color_counter;
+            return false;
+        }
+    }
+    delete color_counter;
+    return true;
 }
+
+bool GCPSolver::ColorArcConsistency(ColorScheme coloring) {
+    for (size_t i = 0; i < graph_->VertsNum(); i++) {
+        GraphNode curr_color = coloring[i];
+        if (curr_color == 0) {
+            continue;
+        } else {
+            std::set<GraphNode*>* adj_colors = graph_->adjacent_verts(i);
+            std::set<GraphNode*>::iterator it;
+            for (it = adj_colors->begin(); it != adj_colors->end(); ++it) {
+                if (**it == curr_color) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true; 
+}
+
+bool GCPSolver::BinarySearch(size_t eps) {
+    //binary search from lower bound to upper bound
+    while (upper_bound_ - lower_bound_ > eps) {
+        size_t mid_point = upper_bound_ + (upper_bound_ - lower_bound_) / 2 ;
+        ColorScheme new_coloring;
+        if (MidSearch(mid_point, &new_coloring)) {
+            graph_->SetColors(new_coloring);
+            upper_bound_ = mid_point;
+        } else {
+            lower_bound_ = mid_point;
+        }
+    }
+    return true;
+}
+
+bool GCPSolver::MidSearch(size_t mid_point, ColorScheme* coloring) {
+    bool isFound = false;
+    //search with constraints
+    if (isFound) {
+        ColorScheme coloring = new GraphNode[graph_->VertsNum()];
+        //construct color scheme
+    }
+    return isFound;
+}
+
+
 
 size_t GCPSolver::MaxClique(size_t num_iters) {
     if (max_clique_ != NULL)

@@ -4,6 +4,7 @@
 #define INPUT_BUFF_SIZE 256
 #define NDEF_COL 0
 #include <set>
+#include <vector>
 #include <cstdio>
 
 typedef size_t GraphNode;
@@ -16,8 +17,6 @@ class Graph{
         size_t num_edges_;
         std::set<GraphNode*>* adjList_;
         bool is_built_;
-        static size_t ColorsNum(ColorScheme coloring, size_t color_size);
-        static void PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num);
     public:
         Graph();
         ~Graph();
@@ -38,6 +37,9 @@ class Graph{
         size_t Degree(size_t node_id);
         size_t Saturation(size_t node_id);
         void PrintColors(FILE* out_file);
+        static std::vector<size_t>* CountColors(ColorScheme coloring, size_t col_size);
+        static size_t ColorsNum(ColorScheme coloring, size_t color_size);
+        static void PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num);
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include "colgr_adjlist.hh"
 #include <cstring>
+#include <algorithm>
 
 Graph::Graph() : is_built_(false) {
 }
@@ -118,6 +119,8 @@ size_t Graph::ColorsNum(ColorScheme coloring, size_t color_size) {
     for (size_t i = 0; i < color_size; i++) {
         colors.insert(coloring[i]);
     }
+    //remove uncolored 
+    colors.erase(0);
     return colors.size();
 }
 
@@ -145,4 +148,25 @@ void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_
 
 void Graph::PrintColors(FILE* out_file) {
     Graph::PrintColorScheme(out_file, vertices_, num_verts_);
+}
+
+std::vector<size_t>* Graph::CountColors(ColorScheme coloring, size_t col_size) {
+    std::vector<size_t>* color_counter = new std::vector<size_t>();
+    std::vector<size_t> color_scheme(coloring, coloring + col_size);
+    ///sort color scheme
+    std::sort(color_scheme.begin(), color_scheme.end());    
+    //count colors
+    std::vector<size_t>::iterator it = color_scheme.begin();
+    size_t curr_val = 0;
+    size_t curr_counter = 0;
+    while (it != color_scheme.end()) {
+        while (it != color_scheme.end() && *it == curr_val) {
+            ++it;
+            ++curr_counter;
+        }
+        color_counter->push_back(curr_counter);
+        ++curr_val;
+        curr_counter = 0;
+    }
+    return color_counter;
 }
