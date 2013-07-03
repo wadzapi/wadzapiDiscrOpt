@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdlib>
 #include <stack>
-
+#include <cstring>
 
 //breaking symmetry by coding like lexicographic ordered 
 //seqeunce of color - ids of vertexes ordered by number of
@@ -42,7 +42,7 @@ bool GCPSolver::ColorNumConsistency(ColorScheme coloring, size_t dest_cols) {
     return true;
 }
 
-bool GCPSolver::ColorSeqConsistency(ColorScheme coloring, size_t dest_cols) {
+bool GCPSolver::ColorSeqConsistency(ColorScheme coloring) {
     ///calc number of uses for every color
     std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
     size_t num_cols = color_counter->size() - 1;
@@ -78,9 +78,7 @@ bool GCPSolver::BinarySearch(size_t eps) {
     //binary search from lower bound to upper bound
     while (upper_bound_ - lower_bound_ > eps) {
         size_t mid_point = upper_bound_ + (upper_bound_ - lower_bound_) / 2 ;
-        ColorScheme new_coloring;
-        if (MidSearch(mid_point, &new_coloring)) {
-            graph_->SetColors(new_coloring);
+        if (MidSearch(mid_point)) {
             upper_bound_ = mid_point;
         } else {
             lower_bound_ = mid_point;
@@ -89,9 +87,8 @@ bool GCPSolver::BinarySearch(size_t eps) {
     return true;
 }
 
-bool GCPSolver::MidSearch(size_t mid_point, ColorScheme* coloring) {
-    bool isFound = false;
-    std::stack<ColorSheme> color_stack;
+bool GCPSolver::MidSearch(size_t mid_point) {
+    std::stack<ColorSheme> nodes;
     size_t verts_num = graph_->VertsNum();
     std::vector<size_t> perm_order;
     size_t i;
@@ -99,27 +96,43 @@ bool GCPSolver::MidSearch(size_t mid_point, ColorScheme* coloring) {
         perm_order.push_back(i);
     }
     std::sort(perm_order.begin(), perm_order.end(), boost::bind(&Graph::CmpNodeDegree, graph_, _1, _2));
-    for (i = 0; i < verts_num; i++) {
-        ///find mode with max saturation
-        std::vector<size_t>::iterator it;
-        std::vector<size_t>::iterator max_sat;
-        size_t max_sat_val = 0;
-        for (it = perm_order.begin(); it != perm_order.end(); ++it) {
-            size_t curr_sat_val = graph_->Saturation(*it);
-            if (curr_sat_val > max_sat_val) {
-                max_sat_val = curr_sat_val;
-                max_sat = it;
+    std::reverse(perm_order.begin(), perm_order.end()); //ordering with min degree
+    ColorScheme init_node = new GraphNode[verts_num]();
+    memset(init_node, 0, sizeof(size_t) * verts_num);
+    nodes.push(init_node);
+    while(nodes.size() > 0) {
+        ColorScheme coloring = nodes.top();
+        nodes.pop();
+        size_t curr_depth = graph_->Depth(coloring);
+        if (curr_dept < verts_num) {
+            for (i = verts_num + 1; i > 0; i--) {
+                ColorScheme add_node = new GraphNode[verts_num];
+                memcpy(add_node, coloring, sizeof(size_t) * verts_num);
+                add_node[perm_order.at(curr_depth)] = i;
+                if (ColorNumConsistency(add_node, mid_point)) {
+                    nodes.push(add_node);
+                } else {
+                    delete[] add_node;
+                }
+            }
+        } else {
+            if (ColorSeqConsistency(coloring)) {
+                if (ColorArcConsistency(coloring) {
+                    graph_->SetColors(coloring);
+                    delete[] coloring;
+                    ///delete all stack items
+                    while (nodes.size() > 0) {
+                        coloring = nodes.top();
+                        delete[] coloring;
+                        nodes.pop();
+                    }
+                    return true;
+                }
             }
         }
-        
+        delete[] coloring;
     } 
-    
-
-    if (isFound) {
-        ColorScheme coloring = new GraphNode[graph_->VertsNum()];
-        //construct color scheme
-    }
-    return isFound;
+    return false;
 }
 
 

@@ -125,11 +125,7 @@ size_t Graph::ColorsNum(ColorScheme coloring, size_t color_size) {
 }
 
 void Graph::SetColors(ColorScheme coloring) {
-    //!!!coloring should be the same size as the vertices_!!!
-    if (vertices_ != NULL) {
-        delete[] vertices_;
-    }
-    vertices_ = coloring;
+    memcpy(vertices, coloring, sizeof(size_t) * num_verts_);
 }
 
 void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num) {
@@ -171,13 +167,17 @@ std::vector<size_t>* Graph::CountColors(ColorScheme coloring, size_t col_size) {
     return color_counter;
 }
 
-bool Graph::IsLeaf(ColorScheme coloring) {
+size_t Graph::Depth(ColorScheme coloring) {
+    size_t depth = num_verts_;
     std::vector<size_t> color_scheme(coloring, coloring + num_verts_);
+    std::sort(color_scheme.begin(), color_scheme.end());    
     std::vector<size_t>::iterator it;
     for (it = color_scheme.begin(); it != color_scheme.end(); ++it) {
         if (**it == 0) {
-            return false;
+            --depth;
+        } else {
+            break;
         }
      }
-    return true'
+    return depth;
 }
