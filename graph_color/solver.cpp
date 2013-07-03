@@ -6,11 +6,6 @@
 #include <stack>
 #include <cstring>
 
-//breaking symmetry by coding like lexicographic ordered 
-//seqeunce of color - ids of vertexes ordered by number of
-//vertices with the same color
-// like 013;24;5 for 3 color coloring
-
 GCPSolver::GCPSolver():max_clique_(NULL) {
 }
 
@@ -21,7 +16,7 @@ GCPSolver::~GCPSolver() {
 }
 
 bool GCPSolver::IsFeasible(ColorScheme coloring, size_t dest_cols) {
-    if (ColorSeqConsistency(coloring, dest_cols)) {
+    if (ColorSeqConsistency(coloring)) {
         if (ColorArcConsistency(coloring)) {
             return true;
         }
@@ -88,7 +83,7 @@ bool GCPSolver::BinarySearch(size_t eps) {
 }
 
 bool GCPSolver::MidSearch(size_t mid_point) {
-    std::stack<ColorSheme> nodes;
+    std::stack<ColorScheme> nodes;
     size_t verts_num = graph_->VertsNum();
     std::vector<size_t> perm_order;
     size_t i;
@@ -104,7 +99,7 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         ColorScheme coloring = nodes.top();
         nodes.pop();
         size_t curr_depth = graph_->Depth(coloring);
-        if (curr_dept < verts_num) {
+        if (curr_depth < verts_num) {
             for (i = verts_num + 1; i > 0; i--) {
                 ColorScheme add_node = new GraphNode[verts_num];
                 memcpy(add_node, coloring, sizeof(size_t) * verts_num);
@@ -117,7 +112,7 @@ bool GCPSolver::MidSearch(size_t mid_point) {
             }
         } else {
             if (ColorSeqConsistency(coloring)) {
-                if (ColorArcConsistency(coloring) {
+                if (ColorArcConsistency(coloring)) {
                     graph_->SetColors(coloring);
                     delete[] coloring;
                     ///delete all stack items
@@ -284,12 +279,15 @@ size_t GCPSolver::ColDSATUR() {
 void GCPSolver::Solve(Graph* gr) {
     graph_ = gr; //set graph
     //find lower bound, heuristic for max clique
-    lower_bound_ = MaxClique(9);
+    lower_bound_ = MaxClique(10);
     //find upper bound by coloring with some heuristic
     //upper_bound_ = ColLF();
     upper_bound_ = ColDSATUR();
     ColorScheme col_heur = graph_->GetColors(); //save heuristic coloring
-    //graph_->InitVerts();//clear coloring
-    //GlobalSearch();
-    //ColorScheme col_search = graph_->GetColors(); //save search coloring
+    graph_->InitVerts();//clear coloring
+    if (!BinarySearch(0)) {
+        //not found??!!! WTF??
+        graph_->SetColors(col_heur);
+    }
+    delete[] col_heur;
 }

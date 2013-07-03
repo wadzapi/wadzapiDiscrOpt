@@ -125,7 +125,7 @@ size_t Graph::ColorsNum(ColorScheme coloring, size_t color_size) {
 }
 
 void Graph::SetColors(ColorScheme coloring) {
-    memcpy(vertices, coloring, sizeof(size_t) * num_verts_);
+    memcpy(vertices_, coloring, sizeof(size_t) * num_verts_);
 }
 
 void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num) {
@@ -173,7 +173,7 @@ size_t Graph::Depth(ColorScheme coloring) {
     std::sort(color_scheme.begin(), color_scheme.end());    
     std::vector<size_t>::iterator it;
     for (it = color_scheme.begin(); it != color_scheme.end(); ++it) {
-        if (**it == 0) {
+        if (*it == 0) {
             --depth;
         } else {
             break;
