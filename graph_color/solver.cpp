@@ -15,7 +15,7 @@ GCPSolver::~GCPSolver() {
     }
 }
 
-bool GCPSolver::IsFeasible(ColorScheme coloring, size_t dest_cols) {
+bool GCPSolver::IsFeasible(ColorScheme *coloring, size_t dest_cols) {
     if (ColorSeqConsistency(coloring)) {
         if (ColorArcConsistency(coloring)) {
             return true;
@@ -24,36 +24,30 @@ bool GCPSolver::IsFeasible(ColorScheme coloring, size_t dest_cols) {
     return false;
 }
 
-bool GCPSolver::ColorNumConsistency(ColorScheme coloring, size_t dest_cols) {
-    ///calc number of uses for every color
-    std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
-    size_t num_cols = color_counter->size() - 1;
-    size_t num_uncolored = color_counter->front();
+bool GCPSolver::ColorNumConsistency(ColorScheme *coloring, size_t dest_cols) {
+    size_t num_cols = coloring->UsedColorsNum();
+    size_t num_uncolored = coloring->GetColorCount(0);
     if (num_cols > dest_cols || num_cols + num_uncolored <  dest_cols) {
-        delete color_counter;
         return false;
     }
-    delete color_counter;
     return true;
 }
 
-bool GCPSolver::ColorSeqConsistency(ColorScheme coloring) {
-    ///calc number of uses for every color
-    std::vector<size_t>* color_counter = Graph::CountColors(coloring, graph_->VertsNum());
-    size_t num_cols = color_counter->size() - 1;
+bool GCPSolver::ColorSeqConsistency(ColorScheme *coloring) {
+   size_t* color_counter = coloring->GetColorCounter();
+    size_t num_cols = coloring->NodesNum();
     for (int i = 1; i < num_cols; i++) {
-        if (color_counter->at(i) < color_counter->at(i+1)) {
-            delete color_counter;
+        if (color_counter[i] < color_counter[i+1]) {
             return false;
         }
     }
-    delete color_counter;
     return true;
 }
 
-bool GCPSolver::ColorArcConsistency(ColorScheme coloring) {
-    for (size_t i = 0; i < graph_->VertsNum(); i++) {
-        GraphNode curr_color = coloring[i];
+bool GCPSolver::ColorArcConsistency(ColorScheme *coloring) {
+    size_t num_cols = coloring->NodesNum();
+    for (size_t i = 0; i < num_cols; i++) {
+        size_t curr_color = coloring->GetColorValue(i);
         if (curr_color == 0) {
             continue;
         } else {
@@ -83,7 +77,7 @@ bool GCPSolver::BinarySearch(size_t eps) {
 }
 
 bool GCPSolver::MidSearch(size_t mid_point) {
-    std::stack<ColorScheme> nodes;
+    std::stack<ColorScheme*> nodes;
     size_t verts_num = graph_->VertsNum();
     std::vector<size_t> perm_order;
     size_t i;
@@ -92,40 +86,39 @@ bool GCPSolver::MidSearch(size_t mid_point) {
     }
     std::sort(perm_order.begin(), perm_order.end(), boost::bind(&Graph::CmpNodeDegree, graph_, _1, _2));
     std::reverse(perm_order.begin(), perm_order.end()); //ordering with min degree
-    ColorScheme init_node = new GraphNode[verts_num]();
-    memset(init_node, 0, sizeof(size_t) * verts_num);
+    ColorScheme* init_node = new ColorScheme(verts_num);
     nodes.push(init_node);
     while(nodes.size() > 0) {
-        ColorScheme coloring = nodes.top();
+        ColorScheme* coloring = nodes.top();
         nodes.pop();
-        size_t curr_depth = graph_->Depth(coloring);
+        size_t curr_depth = coloring->Depth();
         if (curr_depth < verts_num) {
             for (i = curr_depth + 1; i > 0; i--) {
-                ColorScheme add_node = new GraphNode[verts_num];
-                memcpy(add_node, coloring, sizeof(size_t) * verts_num);
-                add_node[perm_order.at(curr_depth)] = i;
+                ColorScheme* add_node = new ColorScheme();
+                *add_node = *coloring;
+                add_node->SetColorValue(perm_order.at(curr_depth), i);
                 if (ColorNumConsistency(add_node, mid_point)) {
                     nodes.push(add_node);
                 } else {
-                    delete[] add_node;
+                    delete add_node;
                 }
             }
         } else {
             if (ColorSeqConsistency(coloring)) {
                 if (ColorArcConsistency(coloring)) {
                     graph_->SetColors(coloring);
-                    delete[] coloring;
+                    delete coloring;
                     ///delete all stack items
                     while (nodes.size() > 0) {
                         coloring = nodes.top();
-                        delete[] coloring;
+                        delete coloring;
                         nodes.pop();
                     }
                     return true;
                 }
             }
         }
-        delete[] coloring;
+        delete coloring;
     } 
     return false;
 }
@@ -276,20 +269,15 @@ size_t GCPSolver::ColDSATUR() {
     return colors_num; 
 }
 
-void GCPSolver::Solve(Graph* gr) {
+ColorScheme* GCPSolver::Solve(Graph* gr) {
     graph_ = gr; //set graph
     //find lower bound, heuristic for max clique
     lower_bound_ = MaxClique(10);
     //find upper bound by coloring with some heuristic
     //upper_bound_ = ColLF();
     upper_bound_ = ColDSATUR();
-    ColorScheme col_heuristic = graph_->GetColors();
-    graph_->InitVerts();//clear coloring
     opt_flag_ = BinarySearch(0);
-    if (!opt_flag_) {
-        graph_->SetColors(col_heuristic);
-    }
-    delete[] col_heuristic;
+    return graph_->GetColors();
 }
 
 bool GCPSolver::IsOptimal() {

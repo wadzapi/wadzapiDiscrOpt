@@ -36,7 +36,8 @@ int main(int argc, char** argv) {
     Graph graph;
     graph.ReadFromFile(inputFile);
     GCPSolver solver;
-    solver.Solve(&graph);
-    graph.PrintColors(outputFile, solver.IsOptimal());
+    ColorScheme* coloring = solver.Solve(&graph);
+    coloring->Print(outputFile, solver.IsOptimal());
+    delete coloring;
     return 0;
 }
