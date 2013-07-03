@@ -71,7 +71,7 @@ bool GCPSolver::ColorArcConsistency(ColorScheme coloring) {
 
 bool GCPSolver::BinarySearch(size_t eps) {
     //binary search from lower bound to upper bound
-    while (upper_bound_ - lower_bound_ > eps) {
+    while (upper_bound_ - eps > lower_bound_ - 1) {
         size_t mid_point = lower_bound_ + (upper_bound_ - lower_bound_) / 2 ;
         if (MidSearch(mid_point)) {
             upper_bound_ = mid_point - 1;
@@ -100,7 +100,7 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = graph_->Depth(coloring);
         if (curr_depth < verts_num) {
-            for (i = curr_depth; i > 0; i--) {
+            for (i = curr_depth + 1; i > 0; i--) {
                 ColorScheme add_node = new GraphNode[verts_num];
                 memcpy(add_node, coloring, sizeof(size_t) * verts_num);
                 add_node[perm_order.at(curr_depth)] = i;
@@ -283,12 +283,13 @@ void GCPSolver::Solve(Graph* gr) {
     //find upper bound by coloring with some heuristic
     //upper_bound_ = ColLF();
     upper_bound_ = ColDSATUR();
-    ColorScheme col_heur = graph_->GetColors(); //save heuristic coloring
+    ColorScheme col_heuristic = graph_->GetColors();
     graph_->InitVerts();//clear coloring
-    if ((opt_flag_ = BinarySearch(0))) {
-        graph_->SetColors(col_heur);
+    opt_flag_ = BinarySearch(0);
+    if (!opt_flag_) {
+        graph_->SetColors(col_heuristic);
     }
-    delete[] col_heur;
+    delete[] col_heuristic;
 }
 
 bool GCPSolver::IsOptimal() {
