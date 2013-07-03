@@ -6,7 +6,7 @@
 #include <stack>
 #include <cstring>
 
-GCPSolver::GCPSolver():max_clique_(NULL) {
+GCPSolver::GCPSolver():max_clique_(NULL), opt_flag_(false) {
 }
 
 GCPSolver::~GCPSolver() {
@@ -72,7 +72,7 @@ bool GCPSolver::ColorArcConsistency(ColorScheme coloring) {
 bool GCPSolver::BinarySearch(size_t eps) {
     //binary search from lower bound to upper bound
     while (upper_bound_ - lower_bound_ > eps) {
-        size_t mid_point = upper_bound_ + (upper_bound_ - lower_bound_) / 2 ;
+        size_t mid_point = lower_bound_ + (upper_bound_ - lower_bound_) / 2 ;
         if (MidSearch(mid_point)) {
             upper_bound_ = mid_point;
         } else {
@@ -100,7 +100,7 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = graph_->Depth(coloring);
         if (curr_depth < verts_num) {
-            for (i = verts_num + 1; i > 0; i--) {
+            for (i = verts_num; i > 0; i--) {
                 ColorScheme add_node = new GraphNode[verts_num];
                 memcpy(add_node, coloring, sizeof(size_t) * verts_num);
                 add_node[perm_order.at(curr_depth)] = i;
@@ -285,9 +285,12 @@ void GCPSolver::Solve(Graph* gr) {
     upper_bound_ = ColDSATUR();
     ColorScheme col_heur = graph_->GetColors(); //save heuristic coloring
     graph_->InitVerts();//clear coloring
-    if (!BinarySearch(0)) {
-        //not found??!!! WTF??
+    if ((opt_flag_ = BinarySearch(0))) {
         graph_->SetColors(col_heur);
     }
     delete[] col_heur;
+}
+
+bool GCPSolver::IsOptimal() {
+    return opt_flag_;
 }

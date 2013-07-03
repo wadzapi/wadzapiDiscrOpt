@@ -5,6 +5,7 @@ class GCPSolver {
         Graph* graph_;
         size_t lower_bound_;
         size_t upper_bound_;
+        bool opt_flag_;
         bool IsFeasible(ColorScheme col);
         void GlobalSearch();
         std::set<GraphNode*>* max_clique_;
@@ -23,4 +24,5 @@ class GCPSolver {
         GCPSolver();
         ~GCPSolver();
         void Solve(Graph* gr);
+        bool IsOptimal();
 };

@@ -36,11 +36,11 @@ class Graph{
         GraphNode* Node(size_t idx); 
         size_t Degree(size_t node_id);
         size_t Saturation(size_t node_id);
-        void PrintColors(FILE* out_file);
+        void PrintColors(FILE* out_file, bool opt_flag);
         size_t Depth(ColorScheme coloring);
         static std::vector<size_t>* CountColors(ColorScheme coloring, size_t col_size);
         static size_t ColorsNum(ColorScheme coloring, size_t color_size);
-        static void PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num);
+        static void PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num, bool opt_flag);
 };
 
 #endif

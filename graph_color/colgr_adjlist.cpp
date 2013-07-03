@@ -128,12 +128,11 @@ void Graph::SetColors(ColorScheme coloring) {
     memcpy(vertices_, coloring, sizeof(size_t) * num_verts_);
 }
 
-void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num) {
+void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_num, bool opt_flag) {
     if (out_file == NULL) {
         return;
     }
     size_t colors_num = Graph::ColorsNum(coloring, color_num);
-    bool opt_flag = 0;
     fprintf(out_file, "%i ", colors_num); //num of used colors
     fprintf(out_file, "%i\n", opt_flag); //optimality proved flag
     for (size_t i = 0; i < color_num - 1; i++) {
@@ -142,8 +141,8 @@ void Graph::PrintColorScheme(FILE* out_file, ColorScheme coloring, size_t color_
     fprintf(out_file, "%i", coloring[color_num -1]);
 }
 
-void Graph::PrintColors(FILE* out_file) {
-    Graph::PrintColorScheme(out_file, vertices_, num_verts_);
+void Graph::PrintColors(FILE* out_file, bool opt_flag) {
+    Graph::PrintColorScheme(out_file, vertices_, num_verts_, opt_flag);
 }
 
 std::vector<size_t>* Graph::CountColors(ColorScheme coloring, size_t col_size) {
