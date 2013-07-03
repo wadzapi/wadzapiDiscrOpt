@@ -74,9 +74,9 @@ bool GCPSolver::BinarySearch(size_t eps) {
     while (upper_bound_ - lower_bound_ > eps) {
         size_t mid_point = lower_bound_ + (upper_bound_ - lower_bound_) / 2 ;
         if (MidSearch(mid_point)) {
-            upper_bound_ = mid_point;
+            upper_bound_ = mid_point - 1;
         } else {
-            lower_bound_ = mid_point;
+            lower_bound_ = mid_point + 1;
         }
     }
     return true;
@@ -100,7 +100,7 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = graph_->Depth(coloring);
         if (curr_depth < verts_num) {
-            for (i = verts_num; i > 0; i--) {
+            for (i = curr_depth; i > 0; i--) {
                 ColorScheme add_node = new GraphNode[verts_num];
                 memcpy(add_node, coloring, sizeof(size_t) * verts_num);
                 add_node[perm_order.at(curr_depth)] = i;
