@@ -93,7 +93,8 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = coloring->Depth();
         if (curr_depth < verts_num) {
-            for (i = curr_depth + 1; i > 0; i--) {
+            size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
+            for (i = max_col_num; i > 0; i--) {
                 ColorScheme* add_node = new ColorScheme();
                 *add_node = *coloring;
                 add_node->SetColorValue(perm_order.at(curr_depth), i);
