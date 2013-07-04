@@ -25,7 +25,7 @@ class Graph{
         void ReadFromFile(FILE* in_file);
         std::set<GraphNode*>* adjacent_verts(size_t id);
         void addEdge(size_t id1, size_t id2);
-        bool isAdjacent(size_t id1, size_t id_2);
+        bool IsAdjacent(size_t id1, size_t id_2);
         ColorScheme *GetColors();
         void SetColors(ColorScheme* coloring);
         bool CmpNodeDegree(size_t id1, size_t id2);

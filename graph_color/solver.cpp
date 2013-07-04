@@ -85,7 +85,6 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         perm_order.push_back(i);
     }
     std::sort(perm_order.begin(), perm_order.end(), boost::bind(&Graph::CmpNodeDegree, graph_, _1, _2));
-    std::reverse(perm_order.begin(), perm_order.end()); //ordering with min degree
     ColorScheme* init_node = new ColorScheme(verts_num);
     nodes.push(init_node);
     while(nodes.size() > 0) {
@@ -93,15 +92,19 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = coloring->Depth();
         if (curr_depth < verts_num) {
+            size_t last_idx = (curr_depth == 0 ? curr_depth : curr_depth - 1);
             size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
             for (i = max_col_num; i > 0; i--) {
-                ColorScheme* add_node = new ColorScheme();
-                *add_node = *coloring;
-                add_node->SetColorValue(perm_order.at(curr_depth), i);
-                if (ColorNumConsistency(add_node, mid_point)) {
-                    nodes.push(add_node);
-                } else {
-                    delete add_node;
+                size_t last_color = coloring->GetColorValue(perm_order.at(last_idx));
+                if (i != last_color || !(graph_->IsAdjacent(perm_order.at(last_idx), perm_order.at(curr_depth)))) {
+                    ColorScheme* add_node = new ColorScheme();
+                    *add_node = *coloring;
+                    add_node->SetColorValue(perm_order.at(curr_depth), i);
+                    if (ColorNumConsistency(add_node, mid_point)) {
+                        nodes.push(add_node);
+                    } else {
+                        delete add_node;
+                    }
                 }
             }
         } else {

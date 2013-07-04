@@ -56,7 +56,7 @@ std::set<GraphNode*> *Graph::adjacent_verts(size_t id){
     return (adjList_ + id);
 }
 
-bool Graph::isAdjacent(size_t id1, size_t id2) {
+bool Graph::IsAdjacent(size_t id1, size_t id2) {
     std::set<GraphNode*>::iterator it = adjList_[id1].find((vertices_ + id2));
     if (it == adjList_[id1].end())
         return false;
