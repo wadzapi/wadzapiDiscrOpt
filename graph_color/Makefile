@@ -27,7 +27,7 @@ solverd.o: solver.hh solver.cpp
 	g++ -g -c -o solverd.o solver.cpp
 
 colorschemed.o: colorscheme.hh colorscheme.cpp
-	g++ -c -o colorschemed.o colorscheme.cpp
+	g++ -g -c -o colorschemed.o colorscheme.cpp
 
 clean:
 	rm ./*.o
