@@ -278,13 +278,20 @@ size_t GCPSolver::ColDSATUR() {
 }
 
 ColorScheme* GCPSolver::Solve(Graph* gr) {
+    ColorScheme* coloring;
     graph_ = gr; //set graph
     //find lower bound, heuristic for max clique
     lower_bound_ = MaxClique(10);
     //find upper bound by coloring with some heuristic
     //upper_bound_ = ColLF();
     upper_bound_ = ColDSATUR();
+    coloring = graph_->GetColors();
+    graph_->InitVerts();
     opt_flag_ = BinarySearch(0);
+    if (opt_flag_) {
+        delete coloring;
+        coloring = graph_->GetColors();
+    }
     return graph_->GetColors();
 }
 
