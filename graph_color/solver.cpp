@@ -15,9 +15,9 @@ GCPSolver::~GCPSolver() {
     }
 }
 
-bool GCPSolver::IsFeasible(ColorScheme *coloring, size_t dest_cols) {
-    if (ColorSeqConsistency(coloring)) {
-        if (ColorArcConsistency(coloring)) {
+bool GCPSolver::IsFeasible(ColorScheme *coloring, size_t curr_id, size_t dest_cols) {
+    if (ColorNumConsistency(coloring, dest_cols)) {
+        if (IsColorArcConsistent(coloring, curr_id)) {
             return true;
         }
     }
@@ -44,20 +44,27 @@ bool GCPSolver::ColorSeqConsistency(ColorScheme *coloring) {
     return true;
 }
 
+bool GCPSolver::IsColorArcConsistent(ColorScheme *coloring, size_t curr_id) {
+    size_t curr_color = coloring->GetColorValue(curr_id);
+    if (curr_color == 0) {
+        return true;
+    } else {
+        std::set<GraphNode*>* adj_colors = graph_->adjacent_verts(curr_id);
+        std::set<GraphNode*>::iterator it;
+        for (it = adj_colors->begin(); it != adj_colors->end(); ++it) {
+            if (**it == curr_color) {
+                return false;
+            }
+        }
+    }
+    return true; 
+}
+
 bool GCPSolver::ColorArcConsistency(ColorScheme *coloring) {
     size_t num_cols = coloring->NodesNum();
     for (size_t i = 0; i < num_cols; i++) {
-        size_t curr_color = coloring->GetColorValue(i);
-        if (curr_color == 0) {
-            continue;
-        } else {
-            std::set<GraphNode*>* adj_colors = graph_->adjacent_verts(i);
-            std::set<GraphNode*>::iterator it;
-            for (it = adj_colors->begin(); it != adj_colors->end(); ++it) {
-                if (**it == curr_color) {
-                    return false;
-                }
-            }
+        if (!IsColorArcConsistent(coloring, i)) {
+            return false;
         }
     }
     return true; 
@@ -92,19 +99,16 @@ bool GCPSolver::MidSearch(size_t mid_point) {
         nodes.pop();
         size_t curr_depth = coloring->Depth();
         if (curr_depth < verts_num) {
-            size_t last_idx = (curr_depth == 0 ? curr_depth : curr_depth - 1);
             size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
+            size_t push_idx = perm_order.at(curr_depth);
             for (i = max_col_num; i > 0; i--) {
-                size_t last_color = coloring->GetColorValue(perm_order.at(last_idx));
-                if (i != last_color || !(graph_->IsAdjacent(perm_order.at(last_idx), perm_order.at(curr_depth)))) {
-                    ColorScheme* add_node = new ColorScheme();
-                    *add_node = *coloring;
-                    add_node->SetColorValue(perm_order.at(curr_depth), i);
-                    if (ColorNumConsistency(add_node, mid_point)) {
-                        nodes.push(add_node);
-                    } else {
-                        delete add_node;
-                    }
+                ColorScheme* add_node = new ColorScheme();
+                *add_node = *coloring;
+                add_node->SetColorValue(push_idx, i);
+                if (IsFeasible(add_node, push_idx, mid_point)) {
+                    nodes.push(add_node);
+                } else {
+                    delete add_node;
                 }
             }
         } else {
@@ -287,3 +291,4 @@ ColorScheme* GCPSolver::Solve(Graph* gr) {
 bool GCPSolver::IsOptimal() {
     return opt_flag_;
 }
+
