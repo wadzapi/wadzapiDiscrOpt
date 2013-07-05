@@ -50,6 +50,7 @@ bool GCPSolver::IsColorArcConsistent(ColorScheme *coloring, size_t curr_id) {
         return true;
     } else {
         std::set<GraphNode*>* adj_colors = graph_->adjacent_verts(curr_id);
+        graph_->SetColors(coloring);
         std::set<GraphNode*>::iterator it;
         for (it = adj_colors->begin(); it != adj_colors->end(); ++it) {
             if (**it == curr_color) {
