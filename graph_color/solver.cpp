@@ -292,7 +292,7 @@ ColorScheme* GCPSolver::Solve(Graph* gr) {
         delete coloring;
         coloring = graph_->GetColors();
     }
-    return graph_->GetColors();
+    return coloring;
 }
 
 bool GCPSolver::IsOptimal() {
