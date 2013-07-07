@@ -14,7 +14,7 @@ void Graph::InitVerts() {
     if (NDEF_COL == 0) {
        memset(vertices_, 0, sizeof(size_t) * num_verts_); 
     } else {
-        for (int i = 0; i < num_verts_; i++) {
+        for (size_t i = 0; i < num_verts_; i++) {
             vertices_[i] = NDEF_COL;
         }        
     }
@@ -41,7 +41,7 @@ void Graph::ReadFromFile(FILE* in_file){
     if (inputLine != NULL) {
         sscanf(inputLine, "%i %i", &num_verts_, &num_edges_);
         Build(num_verts_); 
-        int i, u, v;
+        size_t i, u, v;
         for (i = 0; i < num_edges_; i++) {
             fgets(inputLine, INPUT_BUFF_SIZE, in_file);
             sscanf(inputLine, "%i %i", &u, &v);

@@ -1,7 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "csdp_solver.hh"
+#include <cstdlib>
+
 
 CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL) {
 }

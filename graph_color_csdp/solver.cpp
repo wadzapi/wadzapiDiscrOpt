@@ -6,7 +6,7 @@
 #include <stack>
 #include <cstring>
 
-GCPSolver::GCPSolver():max_clique_(NULL), opt_flag_(false) {
+GCPSolver::GCPSolver(): opt_flag_(false), max_clique_(NULL) {
 }
 
 GCPSolver::~GCPSolver() {
@@ -36,7 +36,7 @@ bool GCPSolver::ColorNumConsistency(ColorScheme *coloring, size_t dest_cols) {
 bool GCPSolver::ColorSeqConsistency(ColorScheme *coloring) {
    size_t* color_counter = coloring->GetColorCounter();
     size_t num_cols = coloring->NodesNum();
-    for (int i = 1; i < num_cols; i++) {
+    for (size_t i = 1; i < num_cols; i++) {
         if (color_counter[i] < color_counter[i+1]) {
             return false;
         }
@@ -139,7 +139,7 @@ size_t GCPSolver::MaxClique(size_t num_iters) {
         delete max_clique_;
     max_clique_ = new std::set<GraphNode*>(); 
     std::set<GraphNode*>* clique;
-    for (int i = 0; i < num_iters; i++) {
+    for (size_t i = 0; i < num_iters; i++) {
         clique = Clique();
         if (clique->size() > max_clique_->size()) {
             delete max_clique_;

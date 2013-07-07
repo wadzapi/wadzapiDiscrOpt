@@ -1,8 +1,8 @@
-CFLAGS=-I./include/
+CFLAGS=-O3 -Wall -DNOSHORTS -I./include 
 LIBS=-lsdp -llapack -lblas -lgfortran -lm
 
 all: main.o graph.o solver.o colorscheme.o theta_col.o
-	g++ $(CFLAGS) -o run_gr_color main.o graph.o solver.o colorscheme.o theta_col.o $(LIBS)
+	g++ $(CFLAGS) main.o solver.o theta_col.o graph.o colorscheme.o $(LIBS) -o run_gr_color 
 
 main.o: main.cpp
 	g++ $(CFLAGS) -c -o main.o main.cpp
@@ -20,7 +20,7 @@ theta_col.o: theta_colorscheme.cpp
 	g++ $(CFLAGS) -c theta_colorscheme.cpp -o theta_col.o
 
 debug: maind.o graphd.o solverd.o colorschemed.o theta_cold.o
-	g++ $(CFLAGS) -g -o run_gr_colord maind.o graphd.o solverd.o colorschemed.o theta_cold.o -lsdp
+	g++ $(CFLAGS) -g maind.o solverd.o theta_cold.o graphd.o colorschemed.o $(LIBS) -o run_gr_colord 
 
 maind.o: main.cpp
 	g++ $(CFLAGS) -g -c -o maind.o main.cpp
