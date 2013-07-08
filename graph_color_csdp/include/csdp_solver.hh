@@ -21,13 +21,14 @@ class CSDPSolver {
         size_t n_, m_;
         struct blockmatrix  X_, Z_;
         double* y_;
+        bool is_logging_;        
         void Build(size_t num_nodes, size_t num_edges);
         void Fill(bool inverse);
         void AllocC();
         void FillC();
         void AllocConstraints();
         void FillConstraints(bool inverse);
-        
+        static const char* logFilename;
         
     public:
         CSDPSolver();
@@ -40,6 +41,7 @@ class CSDPSolver {
         double GetDualObj();
         double GetThetaVal();
         bool Solve();
+        void SetLogging(bool is_logging);
 };
 
 #endif

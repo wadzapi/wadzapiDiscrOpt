@@ -1,18 +1,25 @@
 #include "csdp_solver.hh"
 #include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <fcntl.h>
 
 
-CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL) {
+const char* CSDPSolver::logFilename = "logfile";
+
+
+CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false) {
 }
 
-CSDPSolver::CSDPSolver(Graph* graph, bool inverse): is_built_(false), graph_(NULL), coloring_(NULL) {
+CSDPSolver::CSDPSolver(Graph* graph, bool inverse): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false)  {
     size_t nodes = graph->VertsNum();
     size_t edges = (inverse ? graph->EdgesComplementNum() : graph->EdgesNum());
     Build(nodes, edges);
     SetGraph(graph, true);
 }
 
-CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NULL), coloring_(NULL) {
+CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false)  {
     Build(nodes, edges);
 }
 
@@ -156,6 +163,26 @@ void CSDPSolver::SetGraph(Graph* graph, bool inverse) {
 bool CSDPSolver::Solve() {
     bool result = false;
     initsoln(n_, m_ + 1, C_, a_, constraints_, &X_, &y_, &Z_);
+    //redirect stdout to logfile
+    int bak, logfile;
+    fflush(stdout);
+    bak = dup(1);
+    if (is_logging_) {
+        logfile = open(CSDPSolver::logFilename, O_WRONLY);
+    } else {
+        logfile = open("/dev/null", O_WRONLY);
+    }
+    dup2(logfile, 1);
+    close(logfile);
+    //sdp solving 
     result = easy_sdp(n_, m_ + 1, C_, a_, constraints_, 0.0, &X_, &y_, &Z_, &primal_obj_, &dual_obj_);
+    //redirect stdout bak
+    fflush(stdout);
+    dup2(bak, 1);
+    close(bak);
     return result;
+}
+
+void CSDPSolver::SetLogging(bool is_logging) {
+    is_logging_ = is_logging;
 }
