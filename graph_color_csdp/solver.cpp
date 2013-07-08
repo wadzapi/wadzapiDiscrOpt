@@ -291,7 +291,7 @@ ColorScheme* GCPSolver::Solve(Graph* gr) {
     graph_->InitVerts();
 
     CSDPSolver csdp(gr, true);
-    csdp.SetLogging(true);
+    //csdp.SetLogging(true);
     csdp.Solve();
     double lb = csdp.GetThetaVal();
     

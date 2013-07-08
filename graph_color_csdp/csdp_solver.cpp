@@ -6,7 +6,7 @@
 #include <fcntl.h>
 
 
-const char* CSDPSolver::logFilename = "logfile";
+const char* CSDPSolver::logFilename = "./logfile";
 
 
 CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false) {
@@ -168,7 +168,7 @@ bool CSDPSolver::Solve() {
     fflush(stdout);
     bak = dup(1);
     if (is_logging_) {
-        logfile = open(CSDPSolver::logFilename, O_WRONLY);
+        logfile = open(CSDPSolver::logFilename, O_WRONLY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE);
     } else {
         logfile = open("/dev/null", O_WRONLY);
     }
