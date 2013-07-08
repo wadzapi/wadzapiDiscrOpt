@@ -81,7 +81,7 @@ void CSDPSolver::AllocConstraints() {
 void CSDPSolver::FillConstraints() {
     //Constraint 1 says that Trace(X)=1.
     size_t constr_idx = 1;
-    a_[1]=1.0;
+    a_[constr_idx]=1.0;
     constraints_[constr_idx].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
     constraints_[constr_idx].blocks->blocknum=1;
     constraints_[constr_idx].blocks->numentries=n_;
@@ -92,6 +92,12 @@ void CSDPSolver::FillConstraints() {
     constraints_[constr_idx].blocks->entries=(double *) malloc((n_+1)*sizeof(double));
     constraints_[constr_idx].blocks->iindices=(int *) malloc((n_+1)*sizeof(int));
     constraints_[constr_idx].blocks->jindices=(int *) malloc((n_+1)*sizeof(int));
+    for (size_t i = 1; i <= n_; i++) {
+        constraints_[constr_idx].blocks->entries[i] = 1.0;
+        constraints_[constr_idx].blocks->iindices[i] = i;
+        constraints_[constr_idx].blocks->jindices[i] = i;
+    } 
+
     //Constraints 2 through m+1 enforce X(i,j)=0 when (i,j) is an edge.
     for (size_t i = 0; i < n_; i++) {
         for (size_t j = 0; j < i; j++) {
@@ -140,6 +146,7 @@ double CSDPSolver::GetDualObj() {
 void CSDPSolver::SetGraph(Graph* graph) {
     if ((graph->VertsNum() == n_) && (graph->EdgesNum() == m_)) {
         graph_ = graph;
+        Fill();
     }
 }
 

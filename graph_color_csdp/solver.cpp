@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <stack>
 #include <cstring>
+#include "csdp_solver.hh"
 
 GCPSolver::GCPSolver(): opt_flag_(false), max_clique_(NULL) {
 }
@@ -288,7 +289,12 @@ ColorScheme* GCPSolver::Solve(Graph* gr) {
     upper_bound_ = ColDSATUR();
     coloring = graph_->GetColors();
     graph_->InitVerts();
-    opt_flag_ = BinarySearch(0);
+
+    CSDPSolver csdp(gr);
+    csdp.Solve();
+    double lb = csdp.GetThetaVal();
+    
+    //opt_flag_ = BinarySearch(0);
     if (opt_flag_) {
         delete coloring;
         coloring = graph_->GetColors();

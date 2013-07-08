@@ -1,4 +1,4 @@
-CFLAGS=-O3 -Wall -DNOSHORTS -I./include 
+CFLAGS= -Wall -DNOSHORTS -I./include 
 LIBS=-lsdp -llapack -lblas -lgfortran -lm
 
 all: main.o graph.o solver.o colorscheme.o theta_col.o
@@ -16,8 +16,8 @@ solver.o: solver.cpp
 colorscheme.o: colorscheme.cpp
 	g++ $(CFLAGS) -c -o colorscheme.o colorscheme.cpp
 
-theta_col.o: theta_colorscheme.cpp
-	g++ $(CFLAGS) -c theta_colorscheme.cpp -o theta_col.o
+theta_col.o: csdp_solver.cpp
+	g++ $(CFLAGS) -c csdp_solver.cpp -o theta_col.o
 
 debug: maind.o graphd.o solverd.o colorschemed.o theta_cold.o
 	g++ $(CFLAGS) -g maind.o solverd.o theta_cold.o graphd.o colorschemed.o $(LIBS) -o run_gr_colord 
@@ -34,8 +34,8 @@ solverd.o: solver.cpp
 colorschemed.o: colorscheme.cpp
 	g++ $(CFLAGS) -g -c -o colorschemed.o colorscheme.cpp
 
-theta_cold.o: theta_colorscheme.cpp 
-	g++ $(CFLAGS) -g -c theta_colorscheme.cpp -o theta_cold.o
+theta_cold.o: csdp_solver.cpp 
+	g++ $(CFLAGS) -g -c csdp_solver.cpp -o theta_cold.o
 
 clean:
 	rm ./*.o
