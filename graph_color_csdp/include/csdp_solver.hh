@@ -22,20 +22,20 @@ class CSDPSolver {
         struct blockmatrix  X_, Z_;
         double* y_;
         void Build(size_t num_nodes, size_t num_edges);
-        void Fill();
+        void Fill(bool inverse);
         void AllocC();
         void FillC();
         void AllocConstraints();
-        void FillConstraints();
+        void FillConstraints(bool inverse);
         
         
     public:
         CSDPSolver();
-        CSDPSolver(Graph* graph);
+        CSDPSolver(Graph* graph, bool inverse);
         CSDPSolver(size_t num_nodes, size_t num_edges);
         ~CSDPSolver();
         void SetColoring(ColorScheme* coloring);
-        void SetGraph(Graph *graph);
+        void SetGraph(Graph *graph, bool inverse);
         double GetPrimalObj();
         double GetDualObj();
         double GetThetaVal();

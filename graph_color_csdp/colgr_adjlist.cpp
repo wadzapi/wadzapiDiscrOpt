@@ -109,6 +109,12 @@ size_t Graph::EdgesNum() {
     return num_edges_;
 }
 
+size_t Graph::EdgesComplementNum() {
+    size_t num_comb = num_verts_ * (num_verts_ - 1) / 2;
+    size_t num_compl_edges = num_comb - num_edges_;
+    return num_compl_edges;
+}
+
 GraphNode* Graph::Node(size_t idx) {
     return (vertices_ + idx);
 }

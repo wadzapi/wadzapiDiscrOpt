@@ -5,11 +5,11 @@
 CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL) {
 }
 
-CSDPSolver::CSDPSolver(Graph* graph): is_built_(false), graph_(NULL), coloring_(NULL) {
+CSDPSolver::CSDPSolver(Graph* graph, bool inverse): is_built_(false), graph_(NULL), coloring_(NULL) {
     size_t nodes = graph->VertsNum();
-    size_t edges = graph->EdgesNum();
+    size_t edges = (inverse ? graph->EdgesComplementNum() : graph->EdgesNum());
     Build(nodes, edges);
-    SetGraph(graph);
+    SetGraph(graph, true);
 }
 
 CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NULL), coloring_(NULL) {
@@ -33,10 +33,10 @@ void CSDPSolver::Build(size_t num_nodes, size_t num_edges) {
     is_built_ = true;
 }
 
-void CSDPSolver::Fill() {
+void CSDPSolver::Fill(bool inverse) {
     if (is_built_ || graph_ != NULL) {
         FillC();
-        FillConstraints();
+        FillConstraints(inverse);
     }
 }
 
@@ -78,7 +78,7 @@ void CSDPSolver::AllocConstraints() {
     }
 }
 
-void CSDPSolver::FillConstraints() {
+void CSDPSolver::FillConstraints(bool inverse) {
     //Constraint 1 says that Trace(X)=1.
     size_t constr_idx = 1;
     a_[constr_idx]=1.0;
@@ -101,7 +101,7 @@ void CSDPSolver::FillConstraints() {
     //Constraints 2 through m+1 enforce X(i,j)=0 when (i,j) is an edge.
     for (size_t i = 0; i < n_; i++) {
         for (size_t j = 0; j < i; j++) {
-            if (graph_->IsAdjacent(i, j)) {
+            if ((graph_->IsAdjacent(i, j)) ^ inverse) {
                 ++constr_idx;
                 a_[constr_idx] = 0.0;
                 constraints_[constr_idx].blocks=(struct sparseblock *)
@@ -143,10 +143,13 @@ double CSDPSolver::GetDualObj() {
     return dual_obj_;
 }
 
-void CSDPSolver::SetGraph(Graph* graph) {
-    if ((graph->VertsNum() == n_) && (graph->EdgesNum() == m_)) {
-        graph_ = graph;
-        Fill();
+void CSDPSolver::SetGraph(Graph* graph, bool inverse) {
+    if (graph->VertsNum() == n_) { 
+        size_t num_edges = (inverse ? graph->EdgesComplementNum() : graph->EdgesNum());
+        if (num_edges == m_) {
+            graph_ = graph;
+            Fill(inverse);
+        }
     }
 }
 

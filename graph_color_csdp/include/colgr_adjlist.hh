@@ -33,6 +33,7 @@ class Graph{
         void InitVerts();
         size_t VertsNum();
         size_t EdgesNum();
+        size_t EdgesComplementNum();
         GraphNode* Node(size_t idx); 
         size_t Degree(size_t node_id);
         size_t Saturation(size_t node_id);
