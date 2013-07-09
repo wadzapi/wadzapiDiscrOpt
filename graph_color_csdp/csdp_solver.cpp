@@ -25,13 +25,13 @@ CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NUL
 
 CSDPSolver::~CSDPSolver() {
     if (is_built_) {
-        free_prob(n_,m_+1,C_,a_,constraints_,X_,y_,Z_);
+        free_prob(n_, 2, C_, a_, constraints_, X_, y_, Z_);
     }
 }
 
 void CSDPSolver::Build(size_t num_nodes, size_t num_edges) {
     if (is_built_) {
-        free_prob(n_,m_+1,C_,a_,constraints_,X_,y_,Z_);
+        free_prob(n_, 2, C_, a_, constraints_, X_, y_, Z_);
     }
     n_ = num_nodes;
     m_ = num_edges;
@@ -72,13 +72,35 @@ void CSDPSolver::FillC() {
 }
   
 void CSDPSolver::AllocConstraints() {
-    constraints_ = (struct constraintmatrix *)malloc((m_+2) * sizeof(struct constraintmatrix));
+    constraints_ = (struct constraintmatrix *)malloc(2 * sizeof(struct constraintmatrix));
     if (constraints_ == NULL) {
       printf("Failed to allocate storage for constraints!\n");
       exit(1);
     }
+    constraints_[1].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
+    constraints_[1].blocks->blocknum=1;
+    constraints_[1].blocks->numentries=n_;
+    constraints_[1].blocks->blocksize=n_;
+    constraints_[1].blocks->constraintnum=1;
+    constraints_[1].blocks->next=NULL;
+    constraints_[1].blocks->nextbyblock=NULL;
+    constraints_[1].blocks->entries=(double *) malloc((n_+1)*sizeof(double));
+    constraints_[1].blocks->iindices=(int *) malloc((n_+1)*sizeof(int));
+    constraints_[1].blocks->jindices=(int *) malloc((n_+1)*sizeof(int));
     
-    a_=(double *)malloc((m_+2) * sizeof(double));
+    size_t num_entr = n_ * (n_ + 1) / 2;
+    constraints_[2].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
+    constraints_[2].blocks->blocknum = 1;
+    constraints_[2].blocks->numentries = num_entr;
+    constraints_[2].blocks->blocksize = n_;
+    constraints_[2].blocks->constraintnum = 2;
+    constraints_[2].blocks->next = NULL;
+    constraints_[2].blocks->nextbyblock = NULL;
+    constraints_[2].blocks->entries=(double *) malloc((num_entr + 1) * sizeof(double));
+    constraints_[2].blocks->iindices=(int *) malloc((num_entr + 1) * sizeof(int));
+    constraints_[2].blocks->jindices=(int *) malloc((num_entr + 1) * sizeof(int));
+    
+    a_=(double *)malloc(3 * sizeof(double));
     if (a_==NULL) {
       printf("Failed to allocate storage for a!\n");
       exit(1);
@@ -87,45 +109,22 @@ void CSDPSolver::AllocConstraints() {
 
 void CSDPSolver::FillConstraints(bool inverse) {
     //Constraint 1 says that Trace(X)=1.
-    size_t constr_idx = 1;
-    a_[constr_idx]=1.0;
-    constraints_[constr_idx].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
-    constraints_[constr_idx].blocks->blocknum=1;
-    constraints_[constr_idx].blocks->numentries=n_;
-    constraints_[constr_idx].blocks->blocksize=n_;
-    constraints_[constr_idx].blocks->constraintnum=constr_idx;
-    constraints_[constr_idx].blocks->next=NULL;
-    constraints_[constr_idx].blocks->nextbyblock=NULL;
-    constraints_[constr_idx].blocks->entries=(double *) malloc((n_+1)*sizeof(double));
-    constraints_[constr_idx].blocks->iindices=(int *) malloc((n_+1)*sizeof(int));
-    constraints_[constr_idx].blocks->jindices=(int *) malloc((n_+1)*sizeof(int));
+    a_[1] = 1.0;
     for (size_t i = 1; i <= n_; i++) {
-        constraints_[constr_idx].blocks->entries[i] = 1.0;
-        constraints_[constr_idx].blocks->iindices[i] = i;
-        constraints_[constr_idx].blocks->jindices[i] = i;
+        constraints_[1].blocks->entries[i] = 1.0;
+        constraints_[1].blocks->iindices[i] = i;
+        constraints_[1].blocks->jindices[i] = i;
     } 
 
     //Constraints 2 through m+1 enforce X(i,j)=0 when (i,j) is an edge.
+    a_[2] = 1.0;
+    size_t curr_idx = 1;
     for (size_t i = 0; i < n_; i++) {
-        for (size_t j = 0; j < i; j++) {
-            if ((graph_->IsAdjacent(i, j)) ^ inverse) {
-                ++constr_idx;
-                a_[constr_idx] = 0.0;
-                constraints_[constr_idx].blocks=(struct sparseblock *)
-                malloc(sizeof(struct sparseblock));
-                constraints_[constr_idx].blocks->blocknum=1;
-                constraints_[constr_idx].blocks->numentries=1;
-                constraints_[constr_idx].blocks->blocksize=n_;
-                constraints_[constr_idx].blocks->constraintnum=constr_idx;
-                constraints_[constr_idx].blocks->next=NULL;
-                constraints_[constr_idx].blocks->nextbyblock=NULL;
-                constraints_[constr_idx].blocks->entries=(double *) malloc((2)*sizeof(double));
-                constraints_[constr_idx].blocks->iindices=(int *) malloc((2)*sizeof(int));
-                constraints_[constr_idx].blocks->jindices=(int *) malloc((2)*sizeof(int));
-                constraints_[constr_idx].blocks->entries[1]=1.0;
-                constraints_[constr_idx].blocks->iindices[1]= i + 1;
-                constraints_[constr_idx].blocks->jindices[1]= j + 1;
-            }
+        for (size_t j = i; j < n_; j++) {
+                constraints_[2].blocks->entries[curr_idx]=(double)((graph_->IsAdjacent(i, j)) ^ inverse);
+                constraints_[2].blocks->iindices[curr_idx]= i + 1;
+                constraints_[2].blocks->jindices[curr_idx]= j + 1;
+                ++curr_idx;
         }
     }
 }
@@ -162,7 +161,7 @@ void CSDPSolver::SetGraph(Graph* graph, bool inverse) {
 
 bool CSDPSolver::Solve() {
     bool result = false;
-    initsoln(n_, m_ + 1, C_, a_, constraints_, &X_, &y_, &Z_);
+    initsoln(n_, 2, C_, a_, constraints_, &X_, &y_, &Z_);
     //redirect stdout to logfile
     int bak, logfile;
     fflush(stdout);
@@ -175,7 +174,7 @@ bool CSDPSolver::Solve() {
     dup2(logfile, 1);
     close(logfile);
     //sdp solving 
-    result = easy_sdp(n_, m_ + 1, C_, a_, constraints_, 0.0, &X_, &y_, &Z_, &primal_obj_, &dual_obj_);
+    result = easy_sdp(n_, 2, C_, a_, constraints_, 0.0, &X_, &y_, &Z_, &primal_obj_, &dual_obj_);
     //redirect stdout bak
     fflush(stdout);
     dup2(bak, 1);
