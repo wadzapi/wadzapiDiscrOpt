@@ -5,14 +5,16 @@
 #include <cstdlib>
 #include <stack>
 #include <cstring>
-#include "csdp_solver.hh"
 
-GCPSolver::GCPSolver(): opt_flag_(false), max_clique_(NULL) {
+GCPSolver::GCPSolver(): opt_flag_(false), max_clique_(NULL), csdp_(NULL) {
 }
 
 GCPSolver::~GCPSolver() {
     if (max_clique_ != NULL){
         delete max_clique_;
+    }
+    if (csdp_ != NULL) {
+        delete csdp_;
     }
 }
 
@@ -99,6 +101,12 @@ bool GCPSolver::MidSearch(size_t mid_point) {
     while(nodes.size() > 0) {
         ColorScheme* coloring = nodes.top();
         nodes.pop();
+        double lb = (double)coloring->UsedColorsNum();
+        double ub = 0.0;
+        csdp_->SetColoring(coloring);
+        if (csdp_-> Solve()) {
+            ub = csdp_->GetThetaVal();
+        }
         size_t curr_depth = coloring->Depth();
         if (curr_depth < verts_num) {
             size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
@@ -289,13 +297,13 @@ ColorScheme* GCPSolver::Solve(Graph* gr) {
     upper_bound_ = ColDSATUR();
     coloring = graph_->GetColors();
     graph_->InitVerts();
-
-    CSDPSolver csdp(gr, true);
-    csdp.SetLogging(true);
-    csdp.Solve();
-    double lb = csdp.GetThetaVal();
+    if (csdp_ != NULL) {
+        delete csdp_;
+    }
+    csdp_ = new CSDPSolver(gr, true);
+    csdp_->SetLogging(true);
     
-    //opt_flag_ = BinarySearch(0);
+    opt_flag_ = BinarySearch(0);
     if (opt_flag_) {
         delete coloring;
         coloring = graph_->GetColors();

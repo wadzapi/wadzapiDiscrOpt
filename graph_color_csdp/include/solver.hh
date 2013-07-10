@@ -1,5 +1,6 @@
 #include "colgr_adjlist.hh"
 #include "colorscheme.hh"
+#include "csdp_solver.hh"
 
 class GCPSolver {
     private: 
@@ -9,6 +10,7 @@ class GCPSolver {
         bool opt_flag_;
         void GlobalSearch();
         std::set<GraphNode*>* max_clique_;
+        CSDPSolver* csdp_;
         size_t MaxClique(size_t num_iters);
         std::set<GraphNode*>* Clique();
         size_t ColLF();
