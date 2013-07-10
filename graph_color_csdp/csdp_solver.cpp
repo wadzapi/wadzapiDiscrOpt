@@ -148,8 +148,8 @@ void CSDPSolver::SetColoring(ColorScheme* coloring) {
                 ++constr_idx_;
                 a_[constr_idx_] = 1.0;
                 constraints_[constr_idx_].blocks->entries[1] = 1.0;
-                constraints_[constr_idx_].blocks->iindices[1] = i + 1;
-                constraints_[constr_idx_].blocks->jindices[1] = curr_col;
+                constraints_[constr_idx_].blocks->jindices[1] = i + 1;
+                constraints_[constr_idx_].blocks->iindices[1] = curr_col;
             }
         }
     }
@@ -178,8 +178,8 @@ void CSDPSolver::SetGraph(Graph* graph, bool inverse) {
     }
 }
 
-bool CSDPSolver::Solve() {
-    bool result = false;
+int CSDPSolver::Solve() {
+    int result;
     initsoln(n_, constr_idx_, C_, a_, constraints_, &X_, &y_, &Z_);
     //redirect stdout to logfile
     int bak, logfile;

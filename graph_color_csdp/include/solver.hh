@@ -22,6 +22,7 @@ class GCPSolver {
         bool ColorArcConsistency(ColorScheme* coloring);
         bool BinarySearch(size_t eps);
         bool MidSearch(size_t mid_point);
+        double CalcLB(ColorScheme* coloring);
         
     public:
         GCPSolver();

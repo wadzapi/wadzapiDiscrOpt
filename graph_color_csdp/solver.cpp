@@ -101,38 +101,35 @@ bool GCPSolver::MidSearch(size_t mid_point) {
     while(nodes.size() > 0) {
         ColorScheme* coloring = nodes.top();
         nodes.pop();
-        double lb = (double)coloring->UsedColorsNum();
-        double ub = 0.0;
-        csdp_->SetColoring(coloring);
-        if (csdp_-> Solve()) {
-            ub = csdp_->GetThetaVal();
-        }
-        size_t curr_depth = coloring->Depth();
-        if (curr_depth < verts_num) {
-            size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
-            size_t push_idx = perm_order.at(curr_depth);
-            for (i = max_col_num; i > 0; i--) {
-                ColorScheme* add_node = new ColorScheme();
-                *add_node = *coloring;
-                add_node->SetColorValue(push_idx, i);
-                if (IsFeasible(add_node, push_idx, mid_point)) {
-                    nodes.push(add_node);
-                } else {
-                    delete add_node;
-                }
-            }
-        } else {
-            if (ColorSeqConsistency(coloring)) {
-                if (ColorArcConsistency(coloring)) {
-                    graph_->SetColors(coloring);
-                    delete coloring;
-                    ///delete all stack items
-                    while (nodes.size() > 0) {
-                        coloring = nodes.top();
-                        delete coloring;
-                        nodes.pop();
+        double lb = CalcLB(coloring);
+        if (lb < (double)mid_point) {    
+            size_t curr_depth = coloring->Depth();
+            if (curr_depth < verts_num) {
+                size_t max_col_num = (curr_depth + 1 < mid_point ? curr_depth + 1 : mid_point);
+                size_t push_idx = perm_order.at(curr_depth);
+                for (i = max_col_num; i > 0; i--) {
+                    ColorScheme* add_node = new ColorScheme();
+                    *add_node = *coloring;
+                    add_node->SetColorValue(push_idx, i);
+                    if (IsFeasible(add_node, push_idx, mid_point)) {
+                        nodes.push(add_node);
+                    } else {
+                        delete add_node;
                     }
-                    return true;
+                }
+            } else {
+                if (ColorSeqConsistency(coloring)) {
+                    if (ColorArcConsistency(coloring)) {
+                        graph_->SetColors(coloring);
+                        delete coloring;
+                        ///delete all stack items
+                        while (nodes.size() > 0) {
+                            coloring = nodes.top();
+                            delete coloring;
+                            nodes.pop();
+                        }
+                        return true;
+                    }
                 }
             }
         }
@@ -315,3 +312,13 @@ bool GCPSolver::IsOptimal() {
     return opt_flag_;
 }
 
+
+double GCPSolver::CalcLB(ColorScheme* coloring) {
+    double ub = 0.0;
+    csdp_->SetColoring(coloring);
+    int res = csdp_-> Solve();
+    if (res == 0) {
+        ub = csdp_->GetThetaVal();
+    }
+    return ub;
+}

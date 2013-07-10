@@ -41,7 +41,7 @@ class CSDPSolver {
         double GetPrimalObj();
         double GetDualObj();
         double GetThetaVal();
-        bool Solve();
+        int Solve();
         void SetLogging(bool is_logging);
 };
 
