@@ -88,7 +88,7 @@ void CSDPSolver::AllocConstraints() {
     constraints_[1].blocks->iindices=(int *) malloc((n_+1)*sizeof(int));
     constraints_[1].blocks->jindices=(int *) malloc((n_+1)*sizeof(int));
     
-    size_t num_entr = n_ * (n_ + 1) / 2;
+    size_t num_entr = n_ * n_ ;
     constraints_[2].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
     constraints_[2].blocks->blocknum = 1;
     constraints_[2].blocks->numentries = num_entr;
@@ -117,13 +117,13 @@ void CSDPSolver::FillConstraints(bool inverse) {
     } 
 
     //Constraints 2 through m+1 enforce X(i,j)=0 when (i,j) is an edge.
-    a_[2] = 1.0;
+    a_[2] = n_;
     size_t curr_idx = 1;
     for (size_t i = 0; i < n_; i++) {
-        for (size_t j = i; j < n_; j++) {
-                constraints_[2].blocks->entries[curr_idx]=(double)((graph_->IsAdjacent(i, j)) ^ inverse);
-                constraints_[2].blocks->iindices[curr_idx]= i + 1;
-                constraints_[2].blocks->jindices[curr_idx]= j + 1;
+        for (size_t j = 0; j < n_; j++) {
+                constraints_[2].blocks->entries[curr_idx]=(double)(!(graph_->IsAdjacent(i, j)) ^ inverse);
+                constraints_[2].blocks->iindices[curr_idx]= j + 1;
+                constraints_[2].blocks->jindices[curr_idx]= i + 1;
                 ++curr_idx;
         }
     }
