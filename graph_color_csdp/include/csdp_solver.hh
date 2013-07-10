@@ -11,7 +11,6 @@ class CSDPSolver {
     private:
         bool is_built_;
         Graph *graph_;
-        ColorScheme* coloring_;
         double primal_obj_;
         double dual_obj_;
         size_t coloring_dim;
@@ -29,6 +28,8 @@ class CSDPSolver {
         void AllocConstraints();
         void FillConstraints(bool inverse);
         static const char* logFilename;
+        size_t num_alloc_constr_;
+        size_t constr_idx_;
         
     public:
         CSDPSolver();

@@ -9,29 +9,29 @@
 const char* CSDPSolver::logFilename = "./logfile";
 
 
-CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false) {
+CSDPSolver::CSDPSolver(): is_built_(false), graph_(NULL), is_logging_(false), constr_idx_(0) {
 }
 
-CSDPSolver::CSDPSolver(Graph* graph, bool inverse): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false)  {
+CSDPSolver::CSDPSolver(Graph* graph, bool inverse): is_built_(false), graph_(NULL), is_logging_(false), constr_idx_(0)  {
     size_t nodes = graph->VertsNum();
     size_t edges = (inverse ? graph->EdgesComplementNum() : graph->EdgesNum());
     Build(nodes, edges);
     SetGraph(graph, true);
 }
 
-CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NULL), coloring_(NULL), is_logging_(false)  {
+CSDPSolver::CSDPSolver(size_t nodes, size_t edges): is_built_(false), graph_(NULL), is_logging_(false), constr_idx_(0)  {
     Build(nodes, edges);
 }
 
 CSDPSolver::~CSDPSolver() {
     if (is_built_) {
-        free_prob(n_,m_+1,C_,a_,constraints_,X_,y_,Z_);
+        free_prob(n_, (num_alloc_constr_ - 1), C_, a_, constraints_, X_, y_, Z_);
     }
 }
 
 void CSDPSolver::Build(size_t num_nodes, size_t num_edges) {
     if (is_built_) {
-        free_prob(n_,m_+1,C_,a_,constraints_,X_,y_,Z_);
+        free_prob(n_, (num_alloc_constr_ - 1), C_, a_, constraints_, X_, y_, Z_);
     }
     n_ = num_nodes;
     m_ = num_edges;
@@ -72,14 +72,41 @@ void CSDPSolver::FillC() {
 }
   
 void CSDPSolver::AllocConstraints() {
-    constraints_ = (struct constraintmatrix *)malloc((m_+2) * sizeof(struct constraintmatrix));
+    num_alloc_constr_ = m_ + n_ + 2;
+    ///Alloc constraints
+    constraints_ = (struct constraintmatrix *)malloc((num_alloc_constr_) * sizeof(struct constraintmatrix));
     if (constraints_ == NULL) {
       printf("Failed to allocate storage for constraints!\n");
       exit(1);
     }
-    
-    a_=(double *)malloc((m_+2) * sizeof(double));
-    if (a_==NULL) {
+    size_t i = 1;
+    //first constraint
+    constraints_[i].blocks = (struct sparseblock *)malloc(sizeof(struct sparseblock));
+    constraints_[i].blocks->blocknum = 1;
+    constraints_[i].blocks->numentries = n_;
+    constraints_[i].blocks->blocksize = n_;
+    constraints_[i].blocks->constraintnum = i;
+    constraints_[i].blocks->next = NULL;
+    constraints_[i].blocks->nextbyblock = NULL;
+    constraints_[i].blocks->entries = (double *)malloc((n_+1) * sizeof(double));
+    constraints_[i].blocks->iindices = (int *)malloc((n_+1) * sizeof(int));
+    constraints_[i].blocks->jindices = (int *)malloc((n_+1) * sizeof(int));
+    //contstraints for adjs = 0 and constr for set color = 1
+    for ( i = i+1; i < num_alloc_constr_; i++) {
+        constraints_[i].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
+        constraints_[i].blocks->blocknum = 1;
+        constraints_[i].blocks->numentries = 1;
+        constraints_[i].blocks->blocksize = n_;
+        constraints_[i].blocks->constraintnum = i;
+        constraints_[i].blocks->next = NULL;
+        constraints_[i].blocks->nextbyblock = NULL;
+        constraints_[i].blocks->entries = (double *)malloc((2) * sizeof(double));
+        constraints_[i].blocks->iindices = (int *)malloc((2) * sizeof(int));
+        constraints_[i].blocks->jindices = (int *)malloc((2) * sizeof(int));
+    }
+    ///Alloc righthand vals a
+    a_=(double *)malloc((num_alloc_constr_) * sizeof(double));
+    if (a_ == NULL) {
       printf("Failed to allocate storage for a!\n");
       exit(1);
     }
@@ -87,44 +114,42 @@ void CSDPSolver::AllocConstraints() {
 
 void CSDPSolver::FillConstraints(bool inverse) {
     //Constraint 1 says that Trace(X)=1.
-    size_t constr_idx = 1;
-    a_[constr_idx]=1.0;
-    constraints_[constr_idx].blocks=(struct sparseblock *)malloc(sizeof(struct sparseblock));
-    constraints_[constr_idx].blocks->blocknum=1;
-    constraints_[constr_idx].blocks->numentries=n_;
-    constraints_[constr_idx].blocks->blocksize=n_;
-    constraints_[constr_idx].blocks->constraintnum=constr_idx;
-    constraints_[constr_idx].blocks->next=NULL;
-    constraints_[constr_idx].blocks->nextbyblock=NULL;
-    constraints_[constr_idx].blocks->entries=(double *) malloc((n_+1)*sizeof(double));
-    constraints_[constr_idx].blocks->iindices=(int *) malloc((n_+1)*sizeof(int));
-    constraints_[constr_idx].blocks->jindices=(int *) malloc((n_+1)*sizeof(int));
+    constr_idx_ = 1;
+    a_[constr_idx_]=1.0;
     for (size_t i = 1; i <= n_; i++) {
-        constraints_[constr_idx].blocks->entries[i] = 1.0;
-        constraints_[constr_idx].blocks->iindices[i] = i;
-        constraints_[constr_idx].blocks->jindices[i] = i;
+        constraints_[constr_idx_].blocks->entries[i] = 1.0;
+        constraints_[constr_idx_].blocks->iindices[i] = i;
+        constraints_[constr_idx_].blocks->jindices[i] = i;
     } 
 
     //Constraints 2 through m+1 enforce X(i,j)=0 when (i,j) is an edge.
     for (size_t i = 0; i < n_; i++) {
         for (size_t j = 0; j < i; j++) {
             if ((graph_->IsAdjacent(i, j)) ^ inverse) {
-                ++constr_idx;
-                a_[constr_idx] = 0.0;
-                constraints_[constr_idx].blocks=(struct sparseblock *)
-                malloc(sizeof(struct sparseblock));
-                constraints_[constr_idx].blocks->blocknum=1;
-                constraints_[constr_idx].blocks->numentries=1;
-                constraints_[constr_idx].blocks->blocksize=n_;
-                constraints_[constr_idx].blocks->constraintnum=constr_idx;
-                constraints_[constr_idx].blocks->next=NULL;
-                constraints_[constr_idx].blocks->nextbyblock=NULL;
-                constraints_[constr_idx].blocks->entries=(double *) malloc((2)*sizeof(double));
-                constraints_[constr_idx].blocks->iindices=(int *) malloc((2)*sizeof(int));
-                constraints_[constr_idx].blocks->jindices=(int *) malloc((2)*sizeof(int));
-                constraints_[constr_idx].blocks->entries[1]=1.0;
-                constraints_[constr_idx].blocks->iindices[1]= i + 1;
-                constraints_[constr_idx].blocks->jindices[1]= j + 1;
+                ++constr_idx_;
+                a_[constr_idx_] = 0.0;
+                constraints_[constr_idx_].blocks->entries[1] = 1.0;
+                constraints_[constr_idx_].blocks->iindices[1]= i + 1;
+                constraints_[constr_idx_].blocks->jindices[1]= j + 1;
+            }
+        }
+    }
+}
+
+void CSDPSolver::SetColoring(ColorScheme* coloring) {
+    constr_idx_ = m_ + 1;
+    size_t nodes_num = coloring->NodesNum();
+    if ( nodes_num == n_) {
+        for (size_t i = 0; i < nodes_num; i++) {
+            size_t curr_col = coloring->GetColorValue(i); 
+            if (curr_col == 0) {
+                continue;
+            } else {
+                ++constr_idx_;
+                a_[constr_idx_] = 1.0;
+                constraints_[constr_idx_].blocks->entries[1] = 1.0;
+                constraints_[constr_idx_].blocks->iindices[1] = i + 1;
+                constraints_[constr_idx_].blocks->jindices[1] = curr_col;
             }
         }
     }
@@ -133,13 +158,6 @@ void CSDPSolver::FillConstraints(bool inverse) {
 double CSDPSolver::GetThetaVal() {
     double theta = 0.5 * (primal_obj_ + dual_obj_);
     return theta;
-}
-
-void CSDPSolver::SetColoring(ColorScheme* coloring) {
-    if (coloring->NodesNum() == n_) {
-        coloring_ = coloring;
-    }
-
 }
 
 double CSDPSolver::GetPrimalObj() {
@@ -162,7 +180,7 @@ void CSDPSolver::SetGraph(Graph* graph, bool inverse) {
 
 bool CSDPSolver::Solve() {
     bool result = false;
-    initsoln(n_, m_ + 1, C_, a_, constraints_, &X_, &y_, &Z_);
+    initsoln(n_, constr_idx_, C_, a_, constraints_, &X_, &y_, &Z_);
     //redirect stdout to logfile
     int bak, logfile;
     fflush(stdout);
@@ -175,7 +193,7 @@ bool CSDPSolver::Solve() {
     dup2(logfile, 1);
     close(logfile);
     //sdp solving 
-    result = easy_sdp(n_, m_ + 1, C_, a_, constraints_, 0.0, &X_, &y_, &Z_, &primal_obj_, &dual_obj_);
+    result = easy_sdp(n_, constr_idx_, C_, a_, constraints_, 0.0, &X_, &y_, &Z_, &primal_obj_, &dual_obj_);
     //redirect stdout bak
     fflush(stdout);
     dup2(bak, 1);
